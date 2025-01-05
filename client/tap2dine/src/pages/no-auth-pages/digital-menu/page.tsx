@@ -1,7 +1,7 @@
 import { PhoneCall, Soup } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import DishCard from "./_components/dish-card";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -12,11 +12,13 @@ import {
 import OrderSummary from "./_components/order-summary";
 import { Fragment } from "react/jsx-runtime";
 import { DIGITAL_MENU_LOGO } from "../../../constants/images";
+import PoweredBy from "./_components/powered-by";
 
 export default function DigitalMenu() {
   return (
-    <div className=" w-full min-h-screen gap-2 p-2">
-      <Toaster />
+    <div className="w-full h-auto flex justify-center bg-primary">
+      <div className="max-w-md min-h-screen gap-2 p-2 border-2 border-secondary bg-background relative">
+      <PoweredBy />
       {/* logo section */}
       <div className="flex flex-col items-center justify-center pt-4">
         <div className="size-20 object-contain">
@@ -46,7 +48,7 @@ export default function DigitalMenu() {
                   </Fragment>
                 ))}
               </div>
-              <div className="fixed bottom-0 py-4 bg-background w-[62%]">
+              <div className="fixed bottom-0 w-72 py-4 bg-background">
                 <p className="pb-2 mb-2 font-semibold border-b-2 border-border">Total Price: Rs 2000</p>
 
                 <Button className="w-full">Place order</Button>
@@ -81,5 +83,7 @@ export default function DigitalMenu() {
         </div>
       </div>
     </div>
+    </div>
+    
   )
 }

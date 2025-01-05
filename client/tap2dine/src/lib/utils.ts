@@ -6,21 +6,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function toastTrigger(message:string, type?:'success'|'warning'|'info'|'error'){
+export function toastTrigger(message:string, description?:string, type?:'success'|'warning'|'info'|'error'){
   switch(type){
     case 'success':
-      toast.success(message)
+      toast.success(message,{description})
       break;
     case 'error':
-      toast.error(message)
+      toast.error(message,{description})
       break;
     case 'info':
-      toast.info(message)
+      toast.info(message,{description})
       break;
     case 'warning':
-      toast.warning(message)
+      toast.warning(message,{description})
       break;
     default:
-      toast(message)
+      toast(message,{description})
   }
 }

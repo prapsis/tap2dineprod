@@ -4,6 +4,7 @@ import { Button } from "../../../components/ui/button";
 import {Form} from "../../../components/ui/form";
 import { TLoginType, loginSchema } from "../../../schemas/login";
 import FormInput from "../../../components/reusables/form-input";
+import { useLoginMutation } from "../../../api/mutations/auth.mutation";
 
 
 export default function LoginForm() {
@@ -16,8 +17,9 @@ export default function LoginForm() {
         }
     });
 
+    const {mutate} = useLoginMutation();
     const onSubmit = (data: TLoginType) => {
-        console.log(data)
+        mutate(data)
     }
 
     return (

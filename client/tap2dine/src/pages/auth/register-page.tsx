@@ -1,9 +1,8 @@
 import { Button } from "../../components/ui/button";
 import { DIGITAL_MENU_LOGO, GIRL_ONLINE_ORDER, RESTAURANT } from "../../constants/images"
-import LoginForm from "./_components/login-form";
+import RegisterForm from "./_components/register-form";
 
-
-export default function LoginPage() {
+export default function RegisterPage() {
 
     return (
         <div className="w-full h-screen bg-background flex flex-col justify-center items-center relative">
@@ -17,9 +16,9 @@ export default function LoginPage() {
                 <div className="flex justify-center items-center">
                     <img src={DIGITAL_MENU_LOGO} alt="LOGO" width={90} />
                 </div>
-                <LoginForm />
+                <RegisterForm /> 
             </div>
-            <p className="text-xs z-40">Don&apos;t have an account? <Button variant="link" onClick={() => window.location.href = "/register"} className="underline underline-offset-4 font-semibold text-xs">Sign Up</Button></p>
+            <p className="text-xs z-40">Go Back to <Button variant={"link"} className="underline underline-offset-4 font-semibold text-xs" onClick={() => window.location.href = "/login"}>Login</Button></p>
         </div>
     )
 }

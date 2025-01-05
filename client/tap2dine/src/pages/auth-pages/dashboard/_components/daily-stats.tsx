@@ -25,10 +25,10 @@ export function DailyStats() {
                             <div className='bg-green-500/10 rounded-md p-1'>
                                 <DollarSign className="w-4 h-4 text-green-500"/>
                             </div>
-                            <p className="text-sm font-medium text-gray-500">Revenue</p>
+                                <p className="text-md font-medium">Rs. 1,245</p>
                         </div>
                         <div className='flex items-center'>
-                            <p className="text-md font-medium">Rs. 1,245</p>
+                            <p className="text-sm font-medium text-gray-500">Revenue</p>
                         </div>
                     </div>
                     <div>
@@ -36,10 +36,10 @@ export function DailyStats() {
                             <div className='bg-red-500/10 rounded-md p-1'>
                                 <Users className="w-4 h-4 text-red-500"/>
                             </div>
-                            <p className="text-sm font-medium text-gray-500">Customers</p>
+                            <p className="text-md font-medium">21</p>
                         </div>
                         <div className='flex items-center'>
-                            <p className="text-md font-medium">21</p>
+                            <p className="text-sm font-medium text-gray-500">Customers</p>
                         </div>
                     </div>
                     <div>
@@ -47,10 +47,10 @@ export function DailyStats() {
                             <div className='bg-blue-500/10 rounded-md p-1'>
                                 <ShoppingBag className="w-4 h-4 text-blue-500"/>
                             </div>
-                            <p className="text-sm font-medium text-gray-500">Orders</p>
+                                <p className="text-md font-medium">24</p>
                         </div>
                         <div className='flex items-center'>
-                            <p className="text-md font-medium">24</p>
+                            <p className="text-sm font-medium text-gray-500">Orders</p>
                         </div>
                     </div>
                 </div>

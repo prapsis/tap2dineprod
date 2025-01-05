@@ -10,16 +10,20 @@ import DigitalMenu from "./pages/no-auth-pages/digital-menu/page"
 import { Toaster } from "sonner"
 import LoginPage from "./pages/auth/page"
 import ProtectedRoute from "./pages/auth/protected-route"
+import RegisterPage from "./pages/auth/register-page"
+import CategoryPage from "./pages/auth-pages/category/page"
+import ModalX from "./modals/modal"
 
 
 function App() {
-
   return (
     <>
       <Toaster richColors closeButton />
+      <ModalX/>
       <BrowserRouter>
         <Routes>
-          <Route path="/auth" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path='/' element={
             <ProtectedRoute>
               <Layout />
@@ -31,6 +35,7 @@ function App() {
             <Route path="menu" element={<MenuPage />} />
             <Route path="table" element={<TablePage />} />
             <Route path="inventory" element={<InventoryPage />} />
+            <Route path="category" element={<CategoryPage />} />
 
           </Route>
           <Route path="/digi-menu" element={<DigitalMenu />} />

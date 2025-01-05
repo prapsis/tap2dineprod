@@ -1,4 +1,4 @@
-import { HandPlatter, Home, ShoppingBag, ShoppingBasket, Utensils } from "lucide-react"
+import { Coffee, HandPlatter, Home, ShoppingBag, ShoppingBasket, Utensils } from "lucide-react"
 
 import {
   Sidebar,
@@ -41,6 +41,11 @@ const items = [
     title: "Inventory",
     url: "/inventory",
     icon: ShoppingBasket,
+  },
+  {
+    title: "Category",
+    url: "/category",
+    icon: Coffee,
   },
 ]
 

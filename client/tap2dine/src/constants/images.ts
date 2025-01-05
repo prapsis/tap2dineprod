@@ -6,6 +6,7 @@ import DIGITAL_MENU_LOGO from "../assets/image/digi-menu-logo.png"
 import IMAGE_404 from "../assets/image/404.png"
 import GIRL_ONLINE_ORDER from "../assets/image/onlineorder.png"
 import RESTAURANT from '../assets/image/restaurant.png'
+import DELETE from '../assets/image/delete-illustration.webp'
 
-export { LOGO, NAMED_LOGO, HORIZONTAL_LOGO, FOOD_PLACEHOLDER, DIGITAL_MENU_LOGO, IMAGE_404, GIRL_ONLINE_ORDER, RESTAURANT };
+export { LOGO, NAMED_LOGO, HORIZONTAL_LOGO, FOOD_PLACEHOLDER, DIGITAL_MENU_LOGO, IMAGE_404, GIRL_ONLINE_ORDER, RESTAURANT,DELETE };
 

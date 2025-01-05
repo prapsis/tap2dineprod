@@ -11,7 +11,7 @@ export function OrdersOverview() {
   ]
 
   return (
-    <Card className="col-span-4">
+    <Card>
      <CardHeader className='py-4'>
         <CardTitle className='text-lg'>Orders overview</CardTitle>
     </CardHeader>

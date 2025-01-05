@@ -79,6 +79,10 @@ class DishViewSet(ModelViewSet):
         serializer = self.get_serializer(dishes, many=True)
         return Response(serializer.data)
 
+    def get_permissions(self):
+        if self.action == 'list':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 class IngredientViewSet(ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -109,7 +113,11 @@ class OrderViewSet(ModelViewSet):
             return Response({"message":"Order status updated successfully","status":order.status})
         except Exception as e:
             return Response({"error":str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+    
+    def get_permissions(self):
+        if self.action in ["create","list"]:
+            return [AllowAny()]
+        return [IsAuthenticated()]
 class CheckoutView(APIView):
     def patch(self, request, pk):
         """Handle order checkout."""

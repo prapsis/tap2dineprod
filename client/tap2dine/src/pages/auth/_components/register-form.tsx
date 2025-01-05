@@ -4,22 +4,24 @@ import { Button } from "../../../components/ui/button";
 import {Form} from "../../../components/ui/form";
 import FormInput from "../../../components/reusables/form-input";
 import { registerSchema, TRegisterType } from "../../../schemas/register";
+import { useRegisterMutation } from "../../../api/mutations/auth.mutation";
 
 
 export default function RegisterForm() {
+    const {mutate, isLoading} = useRegisterMutation();
     const form = useForm<TRegisterType>({
         resolver: zodResolver(registerSchema),
         mode: "onChange",
         values: {
             username: "",
             password: "",
-            confirmPassword:"",
+            password2:"",
             email: "",
         }
     });
 
     const onSubmit = (data: TRegisterType) => {
-        console.log(data)
+        mutate(data)
     }
 
     return (
@@ -58,12 +60,12 @@ export default function RegisterForm() {
                         <FormInput 
                         label="Confirm Password" 
                         form={form} 
-                        name="confirmPassword" 
+                        name="password2" 
                         type="password" 
                         placeholder="Password"
                         required
                         />
-                    <Button className="w-full mt-4">Register</Button>
+                    <Button className="w-full mt-4" disabled={isLoading}>Register</Button>
                 </form>
             </Form>
         </div>
