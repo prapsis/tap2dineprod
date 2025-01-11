@@ -27,7 +27,7 @@ class UserRegistrationView(APIView):
             serializer.save()
             return Response({"message":"User Registered Successfully."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class TableViewSet(ModelViewSet):
     queryset = Table.objects.all()
@@ -38,35 +38,29 @@ class TableViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         table = serializer.save()
 
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr_data = f"http:localhost:8000/digi-menu/{table.name}"
-        qr.add_data(qr_data)
-        qr.make(fit=True)
+        # Generate the URL for the QR code
+        qr_url = f"http://localhost:5173/digi-menu/{table.id}"
 
-        qr_image = qr.make_image(fill='black',back_color='white')
-        buffer = BytesIO()
-        qr_image.save(buffer)
-        buffer.seek(0)
-
-        table.qr_code.save(f"{table.name}_qr.png",File(buffer), save=True)
+        # Save the URL in the qr_code field
+        table.qr_code = qr_url
+        table.save()
 
         headers = self.get_success_headers(serializer.data)
-        return Response({"message":"Table created successfully."}, status=status.HTTP_201_CREATED, headers=headers)
-    
+        return Response(
+            {"message": "Table created successfully.", "qr_code_url": qr_url},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
 
 class DishViewSet(ModelViewSet):
     queryset = Dish.objects.all()
-    
+
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
             return DishWriteSerializer
         return DishSerializer
-    
+
     @action(detail=False, methods=['get'], url_path='category/(?P<category_id>\d+)/dishes')
     def get_dishes_by_category(self, request, category_id=None):
         # Filter dishes by category
@@ -83,6 +77,7 @@ class DishViewSet(ModelViewSet):
         if self.action == 'list':
             return [AllowAny()]
         return [IsAuthenticated()]
+
 class IngredientViewSet(ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -96,7 +91,7 @@ class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-    
+
 class OrderViewSet(ModelViewSet):
     queryset = Order.objects.all().order_by('-created_at')
     serializer_class = OrderSerializer
@@ -113,7 +108,7 @@ class OrderViewSet(ModelViewSet):
             return Response({"message":"Order status updated successfully","status":order.status})
         except Exception as e:
             return Response({"error":str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def get_permissions(self):
         if self.action in ["create","list"]:
             return [AllowAny()]

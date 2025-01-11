@@ -1,10 +1,9 @@
 from django.db import models
-
 # Create your models here.
 class Table(models.Model):
     name = models.CharField(unique=True, max_length=40)
-    qr_code = models.ImageField(upload_to = "qrcodes/", blank=True, null=True)
-
+    qr_code = models.URLField(blank=True, null=True)  # Change to store URL instead of an image
+    created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return self.name
 

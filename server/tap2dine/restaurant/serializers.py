@@ -17,12 +17,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password','password2']
-    
+
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password":"Password do not match."})
         return attrs
-    
+
     def create(self, validated_data):
         validated_data.pop('password2')
         user = User.objects.create_user(
@@ -49,14 +49,18 @@ class AddOnSerializer(serializers.ModelSerializer):
         model = AddOn
         fields = ['id', 'name', 'price']
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description']
 
 class DishSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many=True, read_only=True)
     add_ons = AddOnSerializer(many=True, read_only=True)
-
+    category = CategorySerializer(read_only=True)
     class Meta:
         model = Dish
-        fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons']
+        fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons','category']
 
 class DishWriteSerializer(serializers.ModelSerializer):
     ingredients = serializers.PrimaryKeyRelatedField(
@@ -70,10 +74,7 @@ class DishWriteSerializer(serializers.ModelSerializer):
         model = Dish
         fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons','category']
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['id', 'name', 'description']
+
 
 class OrderSerializer(serializers.ModelSerializer):
     table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
@@ -103,9 +104,9 @@ class OrderSerializer(serializers.ModelSerializer):
                     )
                 ingredient.quantity_available -= 1
                 ingredient.save()
-        
+
         notify_order_created(order)
-        
+
         return order
 
 class CheckOutSerializer(serializers.ModelSerializer):
@@ -120,7 +121,7 @@ class CheckOutSerializer(serializers.ModelSerializer):
         if self.instance.checked_out:
             raise serializers.ValidationError("Order has already been checked out.")
         return data
-    
+
     def update(self, instance, validated_data):
         instance.checked_out = True
         instance.total_amount = validated_data.get('total_amount', instance.total_amount)

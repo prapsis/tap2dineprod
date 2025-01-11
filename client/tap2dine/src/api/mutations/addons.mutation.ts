@@ -3,33 +3,33 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toastTrigger } from "../../lib/utils";
 import { TCategoryType } from "../../schemas/category";
 
-export const useAddCategoryMutation = () => {
+export const useAddAddonMutation = () => {
   const queryClient = useQueryClient();
-  const addCategoryMutation = useMutation({
-    mutationFn: (data: TCategoryType) => api.post("/categories/", data),
+  const addAddonMutation = useMutation({
+    mutationFn: (data: TCategoryType) => api.post("/add-ons/", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toastTrigger("Category added successfully", undefined, "success");
+      queryClient.invalidateQueries({ queryKey: ["add-ons"] });
+      toastTrigger("Addon added successfully", undefined, "success");
     },
     onError: (data) => {
       console.log(data);
-      toastTrigger("Category add failed", undefined, "error");
+      toastTrigger("Addon add failed", undefined, "error");
     },
   });
-  return addCategoryMutation;
+  return addAddonMutation;
 };
 
-export const useEditCategoryMutation = ({
+export const useEditAddonMutation = ({
   initiatorName,
 }: {
   initiatorName: string;
 }) => {
   const queryClient = useQueryClient();
-  const editCategoryMutation = useMutation({
+  const editAddonMutation = useMutation({
     mutationFn: (data: TCategoryType) =>
-      api.patch(`/categories/${initiatorName}/`, data),
+      api.patch(`/add-ons/${initiatorName}/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["add-ons"] });
       toastTrigger("Category edited successfully", undefined, "success");
     },
     onError: (data) => {
@@ -37,5 +37,5 @@ export const useEditCategoryMutation = ({
       toastTrigger("Category edit failed", undefined, "error");
     },
   });
-  return editCategoryMutation;
+  return editAddonMutation;
 };

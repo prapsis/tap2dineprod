@@ -2,13 +2,13 @@ import { DataTable } from "../../../components/reusables/data-table";
 import { Button } from "../../../components/ui/button";
 import { columns } from "./column";
 import { Plus } from "lucide-react";
-import { useFetchCategories } from "../../../api/queries/category.query";
 import useModalContext from "../../../hooks/useModalContext";
+import { useFetchAddons } from "../../../api/queries/addons.query";
 
-export default function CategoryTable() {
+export default function AddonTable() {
   const { openModal } = useModalContext();
 
-  const { data } = useFetchCategories();
+  const { data } = useFetchAddons();
   return (
     <div>
       <DataTable
@@ -21,9 +21,9 @@ export default function CategoryTable() {
           },
           add: {
             node: (
-              <Button onClick={() => openModal({ key: "ADD_CATEGORY" })}>
+              <Button onClick={() => openModal({ key: "ADD_ADDON" })}>
                 <Plus />
-                Add Category
+                Add Addon
               </Button>
             ),
           },
