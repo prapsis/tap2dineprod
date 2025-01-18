@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
 from .utils import notify_order_created
-from .models import Table ,Dish, Ingredient, AddOn, Order,Category
+from .models import Table ,Dish, Ingredient, AddOn, Order,Category,OrderItem
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,40 +74,88 @@ class DishWriteSerializer(serializers.ModelSerializer):
         model = Dish
         fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons','category']
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    dish = serializers.PrimaryKeyRelatedField(queryset=Dish.objects.all())
+    add_ons = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=AddOn.objects.all(), required=False
+    )
+    quantity = serializers.IntegerField(min_value=1, default=1)
+
+    class Meta:
+        model = OrderItem
+        fields = ['dish', 'add_ons', 'quantity']
 
 
 class OrderSerializer(serializers.ModelSerializer):
     table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
-    dishes = DishSerializer(many=True, read_only=True)
-    dish_ids = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Dish.objects.all(), write_only=True
-    )
+    items = OrderItemSerializer(many=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'table', 'dishes', 'dish_ids', 'status','remarks', 'created_at', 'updated_at']
+        fields = ['id', 'table', 'items', 'status', 'remarks', 'created_at', 'updated_at']
 
     def create(self, validated_data):
-        dish_ids = validated_data.pop('dish_ids')
-        remarks = validated_data.pop('remarks',None)
+        items_data = validated_data.pop('items')
         order = super().create(validated_data)
-        order.dishes.set(dish_ids)
-        if remarks:
-            order.remarks = remarks
-            order.save()
 
-        for dish in order.dishes.all():
+        for item_data in items_data:
+            dish = item_data.pop('dish')
+            add_ons = item_data.pop('add_ons', [])
+            quantity = item_data.get('quantity', 1)
+
+            order_item = OrderItem.objects.create(order=order, dish=dish, quantity=quantity)
+            order_item.add_ons.set(add_ons)
+            order_item.save()
+
+            # Deduct ingredients based on quantity
             for ingredient in dish.ingredients.all():
-                if ingredient.quantity_available < 1:
+                if ingredient.quantity_available < quantity:
                     raise serializers.ValidationError(
                         f"Insufficient stock for ingredient {ingredient.name}."
                     )
-                ingredient.quantity_available -= 1
+                ingredient.quantity_available -= quantity
                 ingredient.save()
 
         notify_order_created(order)
 
         return order
+
+class OrderItemReadSerializer(serializers.ModelSerializer):
+    dish = DishSerializer(read_only=True)
+    add_ons = AddOnSerializer(many=True, read_only=True)
+    quantity = serializers.IntegerField(min_value=1, default=1)
+    subtotal = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['dish', 'add_ons', 'quantity', 'subtotal']
+
+    def get_subtotal(self, obj):
+        # Calculate base price from dish
+        subtotal = obj.dish.price * obj.quantity
+
+        # Add the price of any add-ons
+        for add_on in obj.add_ons.all():
+            subtotal += add_on.price * obj.quantity
+
+        return subtotal
+
+class OrderReadSerializer(serializers.ModelSerializer):
+    table = TableSerializer(read_only=True)
+    items = OrderItemReadSerializer(many=True, read_only=True)
+    total_amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'table', 'items', 'status', 'remarks',
+                 'created_at', 'updated_at', 'total_amount',
+                 'checked_out', 'payment_method']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_total_amount(self, obj):
+        return sum(item.dish.price * item.quantity +
+                  sum(add_on.price * item.quantity for add_on in item.add_ons.all())
+                  for item in obj.items.all())
 
 class CheckOutSerializer(serializers.ModelSerializer):
     class Meta:

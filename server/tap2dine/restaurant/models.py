@@ -35,7 +35,6 @@ class AddOn(models.Model):
 
 class Order(models.Model):
     table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name='orders')
-    dishes = models.ManyToManyField(Dish, related_name='orders')
     status = models.CharField(
         max_length=20,
         choices=[('Pending', 'Pending'), ('Preparing', 'Preparing'), ('Completed', 'Completed')],
@@ -44,12 +43,22 @@ class Order(models.Model):
     remarks = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    checked_out = models.BooleanField(default=False) 
+    checked_out = models.BooleanField(default=False)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     payment_method = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return f"Order {self.id} for Table {self.table.id}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    dish = models.ForeignKey(Dish, related_name='order_items', on_delete=models.CASCADE)
+    add_ons = models.ManyToManyField('AddOn', related_name='order_items', blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"Item {self.id} for Order {self.order.id}"
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -57,4 +66,3 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-

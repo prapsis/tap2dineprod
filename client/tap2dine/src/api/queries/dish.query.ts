@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { noAuthApi } from "../api";
 import { useQuery } from "@tanstack/react-query";
 import { toastTrigger } from "../../lib/utils";
 
@@ -6,7 +6,7 @@ export const useFetchDishes = () => {
   return useQuery({
     queryKey: ["dishes"],
     queryFn: async () => {
-      const response = await api.get("/dishes/");
+      const response = await noAuthApi.get("/dishes/");
       return response.data;
     },
     onError: () => {
@@ -24,7 +24,7 @@ export const useFetchSingleDish = ({
   return useQuery({
     queryKey: ["dishes"],
     queryFn: async () => {
-      const response = await api.get(`/dishes/${queryParams}/`);
+      const response = await noAuthApi.get(`/dishes/${queryParams}/`);
       return response.data;
     },
     onError: () => {

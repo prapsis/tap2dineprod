@@ -54,7 +54,7 @@ export const columns: ColumnDef<TCategoryResopnseType>[] = [
         <ActionButton<TCategoryResopnseType>
           row={row.original}
           edit={{
-            key: "ADD_CATEGORY",
+            key: "EDIT_CATEGORY",
           }}
           delete={{
             type: "category",

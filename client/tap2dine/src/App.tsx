@@ -45,7 +45,7 @@ function App() {
             <Route path="category" element={<CategoryPage />} />
             <Route path="add-ons" element={<AddonPage />} />
           </Route>
-          <Route path="/digi-menu" element={<DigitalMenu />} />
+          <Route path="/digi-menu/:tableId" element={<DigitalMenu />} />
         </Routes>
       </BrowserRouter>
     </>

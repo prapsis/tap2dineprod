@@ -6,7 +6,7 @@ from .serializers import CategorySerializer, UserRegistrationSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 from .models import Category, Table, Dish, Ingredient, AddOn,Order
-from .serializers import TableSerializer,DishWriteSerializer,DishSerializer, IngredientSerializer, AddOnSerializer,OrderSerializer, CheckOutSerializer
+from .serializers import TableSerializer,DishWriteSerializer,DishSerializer, IngredientSerializer, AddOnSerializer,OrderSerializer, CheckOutSerializer,OrderReadSerializer
 import qrcode
 from io import BytesIO
 from django.core.files import File
@@ -39,18 +39,24 @@ class TableViewSet(ModelViewSet):
         table = serializer.save()
 
         # Generate the URL for the QR code
-        qr_url = f"http://localhost:5173/digi-menu/{table.id}"
+        qr_url = f"http://192.168.1.78:5173/digi-menu/{table.id}"
 
         # Save the URL in the qr_code field
         table.qr_code = qr_url
         table.save()
 
         headers = self.get_success_headers(serializer.data)
+        
         return Response(
             {"message": "Table created successfully.", "qr_code_url": qr_url},
             status=status.HTTP_201_CREATED,
             headers=headers,
         )
+
+    def get_permissions(self):
+        if self.action in ['list']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 
 class DishViewSet(ModelViewSet):
@@ -74,7 +80,7 @@ class DishViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action in ['list','get_dishes_by_category']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -90,6 +96,10 @@ class AddOnViewSet(ModelViewSet):
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    def get_permissions(self):
+        if self.action == 'list':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 
 class OrderViewSet(ModelViewSet):
@@ -97,6 +107,11 @@ class OrderViewSet(ModelViewSet):
     serializer_class = OrderSerializer
 
     @action(detail=True, methods=['patch'])
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return OrderReadSerializer
+        return OrderSerializer
+
     def update_status(self, request, pk=None):
         try:
             order = self.get_object()
@@ -113,6 +128,8 @@ class OrderViewSet(ModelViewSet):
         if self.action in ["create","list"]:
             return [AllowAny()]
         return [IsAuthenticated()]
+
+
 class CheckoutView(APIView):
     def patch(self, request, pk):
         """Handle order checkout."""

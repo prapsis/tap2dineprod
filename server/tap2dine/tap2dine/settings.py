@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-sismjs$y@nift(m8r$=puys$!0l_sb_t0gx(xb7#d2*ixg0(%6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     # third party apps
     'channels',
     'rest_framework',

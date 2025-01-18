@@ -7,7 +7,7 @@ def notify_order_created(order: Order):
     channel_layer = get_channel_layer()
 
     # Prepare the notification message
-    message = f"New order created for table {order.table.id} with {order.dishes.count()} dishes"
+    message = f"New order created for table {order.table.id} with {order.items.count()} dishes"
 
     # Send a message to the "orders" group
     async_to_sync(channel_layer.group_send)(

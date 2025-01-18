@@ -29,3 +29,21 @@ export type TDishResponseType = {
   add_ons: TAddonResopnseType[];
   category: TCategoryResopnseType;
 };
+
+export type TOrderResponseType = {
+  id: string;
+  table: TTableResponseType;
+  items: {
+      dish: TDishResponseType;
+      add_ons: TAddonResopnseType[];
+      quantity: number;
+      subtotal: number;
+  }[];
+  status: string;
+  remarks: string;
+  created_at: string;
+  updated_at: string;
+  total_amount: number;
+  checked_out: boolean;
+  payment_method: string | null;
+};

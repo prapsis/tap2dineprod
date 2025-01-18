@@ -1,6 +1,7 @@
 import { ModalType } from "../types/modal.types";
 import AddAddon from "./add-ons/add-addon-modal";
 import EditAddon from "./add-ons/edit-addon-modal";
+import AddOrder from "./add-order";
 import AddCategory from "./category/add-category-modal";
 import EditCategory from "./category/edit-category-modal";
 import DeleteModal from "./delete-modal";
@@ -27,7 +28,8 @@ export type TModalKeys =
   | "EDIT_TABLE"
   | "VIEW_QR"
   | "ADD_ADDON"
-  | "EDIT_ADDON";
+  | "EDIT_ADDON"
+  | "ADD_ORDER";
 
 export const ModalData: TModalData = {
   ADD_CATEGORY: {
@@ -69,5 +71,9 @@ export const ModalData: TModalData = {
   EDIT_ADDON: {
     title: "Edit Addon",
     component: EditAddon,
+  },
+  ADD_ORDER: {
+    title: "Add Order",
+    component: AddOrder,
   },
 };
