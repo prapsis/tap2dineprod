@@ -6,6 +6,8 @@ import {
   ShoppingBasket,
   Utensils,
   LeafyGreen,
+  Banknote,
+  LogOut,
 } from "lucide-react";
 
 import {
@@ -23,6 +25,7 @@ import {
 import { HORIZONTAL_LOGO, LOGO } from "../../constants/images.ts";
 import { cn } from "../../lib/utils.ts";
 import { Link } from "react-router";
+import useAuthContext from "../../hooks/useAuthContext.tsx";
 // Menu items.
 const items = [
   {
@@ -60,10 +63,22 @@ const items = [
     url: "/add-ons",
     icon: LeafyGreen,
   },
+  {
+    title: "Transactions",
+    url: "/transactions",
+    icon: Banknote,
+  },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const auth = useAuthContext();
+
+  const handleLogout = () => {
+    if (auth) {
+      auth.logout();
+    }
+  };
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader
@@ -94,6 +109,16 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <div className="mt-auto mb-4 mx-3">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={handleLogout}>
+                <LogOut />
+                <span>Logout</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </div>
       </SidebarContent>
     </Sidebar>
   );

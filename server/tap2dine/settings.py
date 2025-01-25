@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 from datetime import timedelta
 
@@ -24,11 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-sismjs$y@nift(m8r$=puys$!0l_sb_t0gx(xb7#d2*ixg0(%6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
-
+KHALTI_PUBLIC_KEY = config('KHALTI_PUBLIC_KEY')
+KHALTI_SECRET_KEY = config('KHALTI_SECRET_KEY')
 # Application definition
 
 INSTALLED_APPS = [
@@ -130,7 +131,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # Adjust the hours as needed
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # Adjust the hours as needed (fix this)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Adjust the days as needed
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,

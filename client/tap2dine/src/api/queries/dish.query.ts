@@ -22,7 +22,7 @@ export const useFetchSingleDish = ({
   queryParams: string;
 }) => {
   return useQuery({
-    queryKey: ["dishes"],
+    queryKey: ["dishes",queryParams],
     queryFn: async () => {
       const response = await noAuthApi.get(`/dishes/${queryParams}/`);
       return response.data;

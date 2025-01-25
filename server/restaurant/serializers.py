@@ -149,7 +149,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'table', 'items', 'status', 'remarks',
                  'created_at', 'updated_at', 'total_amount',
-                 'checked_out', 'payment_method']
+                 'checked_out', 'payment_method','customer_name','customer_email','customer_phone']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_total_amount(self, obj):
@@ -158,9 +158,16 @@ class OrderReadSerializer(serializers.ModelSerializer):
                   for item in obj.items.all())
 
 class CheckOutSerializer(serializers.ModelSerializer):
+    customer_name = serializers.CharField(required=True, max_length=100)
+    customer_email = serializers.EmailField(required=True)
+    customer_phone = serializers.CharField(required=True, max_length=15)
+
     class Meta:
         model = Order
-        fields = ['id','checked_out','total_amount','payment_method']
+        fields = [
+            'id', 'checked_out', 'total_amount', 'payment_method',
+            'customer_name', 'customer_email', 'customer_phone'
+        ]
         read_only_fields = ['id']
 
     def validate(self, data):
@@ -174,5 +181,18 @@ class CheckOutSerializer(serializers.ModelSerializer):
         instance.checked_out = True
         instance.total_amount = validated_data.get('total_amount', instance.total_amount)
         instance.payment_method = validated_data.get('payment_method', instance.payment_method)
+        instance.customer_name = validated_data.get('customer_name', instance.customer_name)
+        instance.customer_email = validated_data.get('customer_email', instance.customer_email)
+        instance.customer_phone = validated_data.get('customer_phone', instance.customer_phone)
         instance.save()
         return instance
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'table', 'total_amount', 'payment_method',
+            'customer_name', 'customer_email', 'customer_phone',
+            'status', 'created_at', 'updated_at'
+        ]
+        read_only_fields = fields

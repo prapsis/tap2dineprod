@@ -1,25 +1,11 @@
-# Restaurant Management API Documentation
+# Restaurant Management System API Documentation
 
 ## Authentication
 
-All endpoints except user registration require authentication. Use JWT token authentication by including the token in the Authorization header:
-```
-Authorization: Bearer <your_token>
-```
-
-## Base URL
-```
-http://127.0.0.1:8000
-```
-
-## Endpoints
-
-### User Management
-
-#### Register User
-- **URL**: `/register/`
+### User Registration
+- **Endpoint**: `/api/register/`
 - **Method**: `POST`
-- **Auth Required**: No
+- **Permissions**: Allow Any
 - **Request Body**:
   ```json
   {
@@ -29,57 +15,34 @@ http://127.0.0.1:8000
     "password2": "string"
   }
   ```
-- **Success Response**: `201 Created`
-- **Error Response**: `400 Bad Request` if passwords don't match or validation fails
+- **Responses**:
+  - `201`: User registered successfully
+  - `400`: Validation errors
 
-### Tables
+### Token Authentication
+- **Obtain Token**: `/api/auth/token`
+- **Refresh Token**: `/api/auth/token/refresh`
+- **Verify Token**: `/api/auth/token/verify`
 
-#### List Tables
-- **URL**: `/tables/`
+## Categories
+
+### List Categories
+- **Endpoint**: `/api/categories/`
 - **Method**: `GET`
-- **Auth Required**: Yes
-- **Success Response**: List of all tables with their QR codes
-
-#### Create Table
-- **URL**: `/tables/`
-- **Method**: `POST`
-- **Auth Required**: Yes
-- **Request Body**:
+- **Permissions**: Allow Any
+- **Response**: Array of category objects
   ```json
   {
-    "name": "string"
+    "id": "integer",
+    "name": "string",
+    "description": "string"
   }
   ```
-- **Success Response**: `201 Created` with QR code automatically generated
-- **Notes**: QR code is automatically generated linking to `/digi-menu/{table_name}`
 
-#### Get Single Table
-- **URL**: `/tables/{id}/`
-- **Method**: `GET`
-- **Auth Required**: Yes
-
-#### Update Table
-- **URL**: `/tables/{id}/`
-- **Method**: `PUT/PATCH`
-- **Auth Required**: Yes
-
-#### Delete Table
-- **URL**: `/tables/{id}/`
-- **Method**: `DELETE`
-- **Auth Required**: Yes
-
-### Categories
-
-#### List Categories
-- **URL**: `/categories/`
-- **Method**: `GET`
-- **Auth Required**: Yes
-- **Success Response**: List of all categories
-
-#### Create Category
-- **URL**: `/categories/`
+### Create Category
+- **Endpoint**: `/api/categories/`
 - **Method**: `POST`
-- **Auth Required**: Yes
+- **Permissions**: Authenticated
 - **Request Body**:
   ```json
   {
@@ -88,147 +51,154 @@ http://127.0.0.1:8000
   }
   ```
 
-#### Get/Update/Delete Category
-- **URL**: `/categories/{id}/`
-- **Methods**: `GET`, `PUT`, `PATCH`, `DELETE`
-- **Auth Required**: Yes
+## Dishes
 
-### Dishes
-
-#### List Dishes
-- **URL**: `/dishes/`
+### List Dishes
+- **Endpoint**: `/api/dishes/`
 - **Method**: `GET`
-- **Auth Required**: Yes
-- **Success Response**: List of all dishes with ingredients and add-ons
+- **Permissions**: Allow Any
+- **Response**: Array of dish objects
+  ```json
+  {
+    "id": "integer",
+    "name": "string",
+    "description": "string",
+    "price": "decimal",
+    "ingredients": [...],
+    "add_ons": [...],
+    "category": {...}
+  }
+  ```
 
-#### Create Dish
-- **URL**: `/dishes/`
+### Get Dishes by Category
+- **Endpoint**: `/api/dishes/category/{category_id}/dishes/`
+- **Method**: `GET`
+- **Permissions**: Allow Any
+- **Response**: Array of dishes in specified category
+
+### Create Dish
+- **Endpoint**: `/api/dishes/`
 - **Method**: `POST`
-- **Auth Required**: Yes
+- **Permissions**: Authenticated
 - **Request Body**:
   ```json
   {
     "name": "string",
     "description": "string",
     "price": "decimal",
-    "ingredients": [1, 2, 3],
-    "add_ons": [1, 2, 3],
-    "category": 1
+    "ingredients": ["ingredient_ids"],
+    "add_ons": ["addon_ids"],
+    "category": "category_id"
   }
   ```
 
-#### Get Dishes by Category
-- **URL**: `/dishes/category/{category_id}/dishes/`
+## Tables
+
+### List Tables
+- **Endpoint**: `/api/tables/`
 - **Method**: `GET`
-- **Auth Required**: Yes
-- **Success Response**: List of dishes in specified category
-
-#### Get/Update/Delete Dish
-- **URL**: `/dishes/{id}/`
-- **Methods**: `GET`, `PUT`, `PATCH`, `DELETE`
-- **Auth Required**: Yes
-
-### Ingredients
-
-#### List/Create Ingredients
-- **URL**: `/ingredients/`
-- **Methods**: `GET`, `POST`
-- **Auth Required**: Yes
-- **Create Request Body**:
+- **Permissions**: Authenticated
+- **Response**: Array of table objects
   ```json
   {
+    "id": "integer",
     "name": "string",
-    "quantity_available": "integer"
+    "qr_code": "url"
   }
   ```
 
-#### Get/Update/Delete Ingredient
-- **URL**: `/ingredients/{id}/`
-- **Methods**: `GET`, `PUT`, `PATCH`, `DELETE`
-- **Auth Required**: Yes
-
-### Add-ons
-
-#### List/Create Add-ons
-- **URL**: `/add-ons/`
-- **Methods**: `GET`, `POST`
-- **Auth Required**: Yes
-- **Create Request Body**:
-  ```json
-  {
-    "name": "string",
-    "price": "decimal"
-  }
-  ```
-
-#### Get/Update/Delete Add-on
-- **URL**: `/add-ons/{id}/`
-- **Methods**: `GET`, `PUT`, `PATCH`, `DELETE`
-- **Auth Required**: Yes
-
-### Orders
-
-#### List Orders
-- **URL**: `/orders/`
-- **Method**: `GET`
-- **Auth Required**: Yes
-- **Success Response**: List of all orders sorted by creation date
-
-#### Create Order
-- **URL**: `/orders/`
+### Create Table
+- **Endpoint**: `/api/tables/`
 - **Method**: `POST`
-- **Auth Required**: Yes
+- **Permissions**: Authenticated
+- **Response**: Table details with QR code URL
+
+## Orders
+
+### Create Order
+- **Endpoint**: `/api/orders/`
+- **Method**: `POST`
+- **Permissions**: Allow Any
 - **Request Body**:
   ```json
   {
-    "table": 1,
-    "dish_ids": [1, 2, 3],
-    "remarks": "string (optional)"
+    "table": "table_id",
+    "items": [
+      {
+        "dish": "dish_id",
+        "add_ons": ["addon_ids"],
+        "quantity": "integer"
+      },
+    "remarks":"optional",
+    ]
   }
   ```
-- **Notes**: 
-  - Automatically checks ingredient availability
-  - Decrements ingredient quantities
-  - Sends notification on order creation
 
-#### Update Order Status
-- **URL**: `/orders/{id}/update_status/`
+### Update Order Status
+- **Endpoint**: `/api/orders/{order_id}/update_status/`
 - **Method**: `PATCH`
-- **Auth Required**: Yes
+- **Permissions**: Authenticated
 - **Request Body**:
   ```json
   {
-    "status": "string" // "Pending", "Preparing", or "Completed"
+    "status": "Pending|Preparing|Completed"
   }
   ```
 
-#### Checkout Order
-- **URL**: `/orders/{id}/checkout/`
+### Checkout Order
+- **Endpoint**: `/api/orders/{order_id}/checkout/`
 - **Method**: `PATCH`
-- **Auth Required**: Yes
 - **Request Body**:
   ```json
   {
-    "total_amount": "decimal",
+    "customer_name": "string",
+    "customer_email": "string",
+    "customer_phone": "string",
     "payment_method": "string"
   }
   ```
-- **Notes**: 
-  - Order must be in "Completed" status
-  - Cannot checkout already checked-out orders
 
-#### Get/Update/Delete Order
-- **URL**: `/orders/{id}/`
-- **Methods**: `GET`, `PUT`, `PATCH`, `DELETE`
-- **Auth Required**: Yes
+## Payment Integration (Khalti)
 
-## Error Responses
+### Initiate Payment
+- **Endpoint**: `/api/initiate-payment/`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "amount": "integer",
+    "purchase_order_id": "string",
+    "purchase_order_name": "string",
+    "customer_name": "string",
+    "customer_email": "string",
+    "customer_phone": "string"
+  }
+  ```
 
-The API may return the following error codes:
-- `400 Bad Request`: Invalid input data
-- `401 Unauthorized`: Missing or invalid authentication
-- `403 Forbidden`: Insufficient permissions
-- `404 Not Found`: Resource not found
-- `500 Internal Server Error`: Server-side error
+### Verify Payment
+- **Endpoint**: `/api/verify-payment/`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "pidx": "string"
+  }
+  ```
 
-All error responses include a message explaining the error.
+## Transactions
+
+### List Transactions
+- **Endpoint**: `/api/transactions/`
+- **Method**: `GET`
+- **Permissions**: Authenticated
+- **Response**: List of completed and checked-out orders
+
+## Additional Endpoints
+
+- Ingredient Management: `/api/ingredients/`
+- Add-On Management: `/api/add-ons/`
+
+## Authentication Requirements
+- Most endpoints require authentication
+- `GET` endpoints for dishes, categories, and order creation are public
+- Other endpoints require valid JWT token

@@ -1,16 +1,17 @@
+import json
+import requests
+from decouple import config
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .serializers import CategorySerializer, UserRegistrationSerializer
+from .serializers import CategorySerializer, TransactionSerializer, UserRegistrationSerializer
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
 from .models import Category, Table, Dish, Ingredient, AddOn,Order
 from .serializers import TableSerializer,DishWriteSerializer,DishSerializer, IngredientSerializer, AddOnSerializer,OrderSerializer, CheckOutSerializer,OrderReadSerializer
-import qrcode
-from io import BytesIO
-from django.core.files import File
 from rest_framework.decorators import action
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -39,7 +40,7 @@ class TableViewSet(ModelViewSet):
         table = serializer.save()
 
         # Generate the URL for the QR code
-        qr_url = f"http://192.168.1.78:5173/digi-menu/{table.id}"
+        qr_url = f"{config('DIGI_MENU_URL')}{table.id}"
 
         # Save the URL in the qr_code field
         table.qr_code = qr_url
@@ -63,9 +64,14 @@ class DishViewSet(ModelViewSet):
     queryset = Dish.objects.all()
 
     def get_serializer_class(self):
-        if self.action in ['create', 'update']:
+        if self.action in ['create', 'update', 'partial_update']:
             return DishWriteSerializer
         return DishSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        # Dynamically call the serializer class
+        serializer_class = self.get_serializer_class()
+        return serializer_class(*args, **kwargs)
 
     @action(detail=False, methods=['get'], url_path='category/(?P<category_id>\d+)/dishes')
     def get_dishes_by_category(self, request, category_id=None):
@@ -80,7 +86,7 @@ class DishViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def get_permissions(self):
-        if self.action in ['list','get_dishes_by_category']:
+        if self.action in ['list','get_dishes_by_category','retrieve']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -112,6 +118,7 @@ class OrderViewSet(ModelViewSet):
             return OrderReadSerializer
         return OrderSerializer
 
+    @action(detail=True, methods=['patch'], url_path='update_status')
     def update_status(self, request, pk=None):
         try:
             order = self.get_object()
@@ -146,3 +153,63 @@ class CheckoutView(APIView):
                 "order": serializer.data
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class InitiatePaymentView(APIView):
+    def post(self, request,*args, **kwargs):
+        khalti_secret_key = config('KHALTI_SECRET_KEY')
+        payment_url = 'https://dev.khalti.com/api/v2/epayment/initiate/'
+
+        data = json.loads(request.body)
+        # config('FRONTEND_URL')
+        payload={
+                "return_url": config('PAYMENT_SUCCESS'),
+                "website_url": config('FRONTEND_URL'),
+                "amount": data.get('amount'),
+                "purchase_order_id": data.get('purchase_order_id'),
+                "purchase_order_name": data.get('purchase_order_name'),
+                "customer_info": {
+                    "name": data.get('customer_name'),
+                    "email": data.get('customer_email'),
+                    "phone": data.get('customer_phone')
+                },
+            }
+        
+        headers = {
+            'Authorization': f'key {khalti_secret_key}',
+            'Content-Type': 'application/json',
+        }
+        response = requests.post(payment_url, json=payload, headers=headers)
+        if response.status_code == 200:
+            return JsonResponse(response.json())
+        else:
+            return JsonResponse({'error': 'Failed to initiate payment'}, status=response.status_code)
+        
+class VerifyPaymentView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Replace with your secret key
+        khalti_secret_key = config('KHALTI_SECRET_KEY')
+        lookup_url = 'https://dev.khalti.com/api/v2/epayment/lookup/'
+
+        # Get pidx from the request
+        pidx = request.data.get('pidx')
+        if not pidx:
+            return Response({'error': 'pidx is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Payload for lookup
+        payload = {'pidx': pidx}
+        headers = {
+            'Authorization': f'Key {khalti_secret_key}',
+        }
+
+        # Send request to Khalti
+        response = requests.post(lookup_url, json=payload, headers=headers)
+        if response.status_code == 200:
+            # Payment details from Khalti
+            payment_data = response.json()
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Failed to verify payment', 'details': response.json()}, status=response.status_code)
+
+class TransactionViewSet(ReadOnlyModelViewSet):
+    queryset = Order.objects.filter(status='Completed', checked_out=True)
+    serializer_class = TransactionSerializer

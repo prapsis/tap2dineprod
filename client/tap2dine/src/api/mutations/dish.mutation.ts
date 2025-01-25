@@ -29,6 +29,8 @@ export const useEditDishMutation = ({
       api.patch(`/dishes/${initiatorName}/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dishes"] });
+      queryClient.invalidateQueries({ queryKey: ["dishes", initiatorName] });
+      // queryClient.refetchQueries({ queryKey: ["dishes"] });
       toastTrigger("Dish edited successfully", undefined, "success");
     },
     onError: (data) => {

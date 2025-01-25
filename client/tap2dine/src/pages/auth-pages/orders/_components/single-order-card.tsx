@@ -7,10 +7,8 @@ export type TSingleOrderCardProps = {
     data: TOrderResponseType
 }
 export default function SingleOrderCard({ data, onClick }: TSingleOrderCardProps) {
-    // Format the created_at timestamp
     const orderTime = format(new Date(data.created_at), 'hh:mm a');
 
-    // Get status color based on order status
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pending':

@@ -12,7 +12,7 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
   const {dispatch} = useOrderContext();
   const [quantity, setQuantity] = useState(1);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>(
-    dish?.ingredients.map((ing) => ing.id) || []
+    dish?.ingredients?.map((ing) => ing.id) || []
   );
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
@@ -35,8 +35,8 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
   const totalPrice = (
     (Number(dish?.price) || 0) * quantity +
     selectedAddons.reduce((sum, addonId) => {
-      const addon = dish?.add_ons.find((a) => a.id === addonId);
-      return sum + (addon ? Number(addon.price) : 0);
+      const addon = dish?.add_ons?.find((a) => a.id === addonId);
+      return sum + (addon ? Number(addon.price) * quantity : 0);
     }, 0)
   ).toFixed(2);
 
@@ -47,13 +47,12 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
       quantity: quantity,
       price: Number(dish?.price),
       totalPrice:Number(totalPrice),
-      ingredients: dish?.ingredients.map(ing => ({
+      ingredients: dish?.ingredients?.map(ing => ({
         id: ing.id,
         name: ing.name,
         include: selectedIngredients.includes(ing.id)
       })) || [],
-      addons: dish?.add_ons
-        .filter(addon => selectedAddons.includes(addon.id))
+      addons: dish?.add_ons?.filter(addon => selectedAddons.includes(addon.id))
         .map(addon => ({
           id: addon.id,
           name: addon.name,
@@ -100,7 +99,7 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
         <div>
           <h3 className="text-lg font-semibold mb-2">Customize Ingredients</h3>
           <div className="space-y-2">
-            {dish?.ingredients.length ? (
+            {dish?.ingredients?.length ? (
               dish.ingredients.map((ingredient) => (
                 <div key={ingredient.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -124,7 +123,7 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
         <div>
           <h3 className="text-lg font-semibold mb-2">Add-ons</h3>
           <div className="space-y-2">
-            {dish?.add_ons.length ? (
+            {dish?.add_ons?.length ? (
               dish.add_ons.map((addon) => (
                 <div key={addon.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">

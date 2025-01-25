@@ -5,9 +5,12 @@ import {Form} from "../../../components/ui/form";
 import { TLoginType, loginSchema } from "../../../schemas/login";
 import FormInput from "../../../components/reusables/form-input";
 import { useLoginMutation } from "../../../api/mutations/auth.mutation";
+import useAuthContext from "../../../hooks/useAuthContext";
+import { toastTrigger } from "../../../lib/utils";
 
 
 export default function LoginForm() {
+    const { setAccessToken, validateToken} = useAuthContext();
     const form = useForm<TLoginType>({
         resolver: zodResolver(loginSchema),
         mode: "onChange",
@@ -19,7 +22,16 @@ export default function LoginForm() {
 
     const {mutate} = useLoginMutation();
     const onSubmit = (data: TLoginType) => {
-        mutate(data)
+        mutate(data,{
+            onSuccess: (data) => {
+                localStorage.setItem("accessToken", data?.data.access);
+                localStorage.setItem("refreshToken", data?.data.refresh);
+                setAccessToken(data?.data.access); // Update the token state
+                toastTrigger("Login successful", undefined, "success");
+                validateToken(); // Trigger re-validation
+                window.location.href = "/";
+            }
+        })
     }
 
     return (

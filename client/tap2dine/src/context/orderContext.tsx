@@ -7,13 +7,15 @@ export type OrderItem = {
   price: number;
   ingredients: { id: string; name: string; include: boolean }[];
   addons: { id: string; name: string; price: number }[];
-  totalPrice:number;
+  totalPrice: number;
 };
 
 export type Order = {
   table: string;
   items: OrderItem[];
   remarks: string;
+  orderStatus?: 'initial' | 'placed' | 'completed';
+  lastOrderId?: string;
 };
 
 type OrderAction =
@@ -25,7 +27,9 @@ type OrderAction =
     }
   | { type: "ADD_ORDER_REMARK" }
   | { type: "RESET_ORDER" }
-  | { type: "SET_TABLE"; payload: {tableId:string} };
+  | { type: "SET_TABLE"; payload: {tableId:string} }
+  | { type: "SET_ORDER_STATUS"; payload: Order['orderStatus'] }
+  | { type: "SET_LAST_ORDER_ID"; payload: string };
 
 export type OrderContextType = {
   order: Order;
@@ -41,6 +45,7 @@ const initialOrder: Order = {
   table: String(0),
   items: [],
   remarks: "",
+  orderStatus: 'initial'
 };
 
 // Reducer function
@@ -71,7 +76,13 @@ function orderReducer(state: Order, action: OrderAction): Order {
         ...state,
         items: state.items.map((item) =>
           item.dishId === action.payload.dishId
-            ? { ...item, ...action.payload, totalPrice: action.payload.quantity ? item.totalPrice + (item.price * (action.payload.quantity - item.quantity)) : item.totalPrice }
+            ? { 
+                ...item, 
+                ...action.payload, 
+                totalPrice: action.payload.quantity 
+                  ? item.totalPrice + (item.price * (action.payload.quantity - item.quantity)) 
+                  : item.totalPrice 
+              }
             : item,
         ),
       };
@@ -80,9 +91,21 @@ function orderReducer(state: Order, action: OrderAction): Order {
       return initialOrder;
     }
     case "SET_TABLE": {
-      return{
+      return {
         ...state,
         table: action.payload.tableId
+      }
+    }
+    case "SET_ORDER_STATUS": {
+      return {
+        ...state,
+        orderStatus: action.payload
+      }
+    }
+    case "SET_LAST_ORDER_ID": {
+      return {
+        ...state,
+        lastOrderId: action.payload
       }
     }
     default:

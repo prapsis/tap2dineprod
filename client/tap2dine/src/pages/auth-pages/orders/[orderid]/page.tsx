@@ -1,34 +1,76 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
-import { Check, Plus, Clock } from "lucide-react";
+import { Check, Plus, Clock, Coffee, AlertCircle } from "lucide-react";
 import PageHeader from "../../../../components/reusables/page-header";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../../../../components/ui/card";
 import { Badge } from "../../../../components/ui/badge";
 import { useFetchSingleOrder } from "../../../../api/queries/orders.query";
 import { TOrderResponseType } from "../../../../types/response.types";
+import { useUpdateOrderStatusMutation } from "../../../../api/mutations/orders.mutation";
+
+export type OrderStatus = "Pending" | "Preparing" | "Completed";
 
 export default function SingleOrder() {
   const [order, setOrder] = useState<TOrderResponseType | null>(null);
   const { id: orderId } = useParams();
   const { data, isLoading } = useFetchSingleOrder({ orderId: String(orderId) });
+  const { mutate } = useUpdateOrderStatusMutation({ orderId: String(orderId) });
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (data) setOrder(data);
   }, [orderId, data]);
 
-  const calculateItemTotal = (item: TOrderResponseType['items'][0]) => {
-    const dishTotal = Number(item.dish.price) * item.quantity;
-    const addonsTotal = item.add_ons.reduce((sum, addon) => 
-      sum + (Number(addon.price) * item.quantity), 0
-    );
-    return dishTotal + addonsTotal;
+  const getStatusColor = (status: OrderStatus) => {
+    switch (status) {
+      case "Pending":
+        return "bg-yellow-500 hover:bg-yellow-600";
+      case "Preparing":
+        return "bg-blue-500 hover:bg-blue-600";
+      case "Completed":
+        return "bg-green-500 hover:bg-green-600";
+      default:
+        return "bg-gray-500 hover:bg-gray-600";
+    }
   };
 
-  // Calculate order total
-  const orderTotal = order?.items?.reduce((total, item) => 
-    total + calculateItemTotal(item), 0
-  ) ?? 0;
+  const getStatusAction = (currentStatus: OrderStatus) => {
+    switch (currentStatus) {
+      case "Pending":
+        return {
+          label: "Start Preparing",
+          icon: <Coffee className="h-4 w-4 mr-2" />,
+          nextStatus: "Preparing"
+        };
+      case "Preparing":
+        return {
+          label: "Mark Completed",
+          icon: <Check className="h-4 w-4 mr-2" />,
+          nextStatus: "Completed"
+        };
+      case "Completed":
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const handleStatusUpdate = (newStatus: OrderStatus) => {
+    mutate({ status: newStatus });
+  };
+  // const calculateItemTotal = (item: TOrderResponseType['items'][0]) => {
+  //   const dishTotal = Number(item.dish.price) * item.quantity;
+  //   const addonsTotal = item.add_ons.reduce((sum, addon) => 
+  //     sum + (Number(addon.price) * item.quantity), 0
+  //   );
+  //   return dishTotal + addonsTotal;
+  // };
+
+  // // Calculate order total
+  // const orderTotal = order?.items?.reduce((total, item) => 
+  //   total + calculateItemTotal(item), 0
+  // ) ?? 0;
 
   if (isLoading) {
     return (
@@ -39,9 +81,11 @@ export default function SingleOrder() {
     );
   }
 
+  const statusAction = order?.status ? getStatusAction(order.status as OrderStatus) : null;
+
   return (
     <>
-      <PageHeader 
+      <PageHeader
         title={`${order?.table.name} - Order #${orderId}`}
         description={
           <span className="text-sm text-gray-500">
@@ -66,7 +110,7 @@ export default function SingleOrder() {
           <CardHeader>
             <CardTitle className="flex justify-between items-center text-lg">
               <span>Table: {order?.table.name}</span>
-              <Badge variant={order?.status.toLowerCase() === 'completed' ? 'secondary' : 'default'}>
+              <Badge className={`${order?.status ? getStatusColor(order.status as OrderStatus) : ''}`}>
                 {order?.status}
               </Badge>
             </CardTitle>
@@ -99,7 +143,7 @@ export default function SingleOrder() {
 
                   <div className="flex justify-end mt-2">
                     <p className="text-sm text-gray-600">
-                      Subtotal: Rs. {calculateItemTotal(item).toFixed(2)}
+                      Subtotal: Rs. {item.subtotal.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -107,27 +151,35 @@ export default function SingleOrder() {
             </div>
 
             {order?.remarks && (
-              <div className="mt-4 p-3 bg-gray-50 rounded">
-                <p className="text-sm font-medium">Remarks:</p>
-                <p className="text-sm">{order.remarks}</p>
+              <div className="border-t pt-4">
+                <div className="flex items-start gap-2 text-amber-600">
+                  <AlertCircle className="h-4 w-4 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm">Special Instructions:</p>
+                    <p className="text-sm">{order.remarks}</p>
+                  </div>
+                </div>
               </div>
             )}
 
             <div className="flex justify-between items-center mt-4 pt-2 border-t">
               <p className="text-lg font-semibold">
-                Total: Rs. {orderTotal.toFixed(2)}
+                Total: Rs. {order?.total_amount.toFixed(2)}
               </p>
-              {!order?.checked_out && (
-                <div className="flex gap-3">
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700"
-                    disabled={order?.status.toLowerCase() === 'completed'}
+              <div className="flex gap-3">
+                {statusAction && (
+                  <Button
+                    className={getStatusColor(order?.status as OrderStatus)}
+                    onClick={() => handleStatusUpdate(statusAction.nextStatus as OrderStatus)}
                   >
-                    <Check className="h-4 w-4 mr-2"/>Mark as Served
+                    {statusAction.icon}
+                    {statusAction.label}
                   </Button>
-                  <Button>Checkout</Button>
-                </div>
-              )}
+                )}
+                {order?.status === "Completed" && (
+                  <Button onClick={()=>navigate(`/orders/${orderId}/checkout`)}>Checkout</Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

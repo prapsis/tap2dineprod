@@ -5,7 +5,7 @@ import { TIngredientType } from "../schemas/ingredient";
 import { TAddonResopnseType, TDishResponseType, TTableResponseType } from "./response.types";
 export type ModalType<K extends TModalKeys> = {
   initiatorName?: string;
-  data?: TModalDataMap[K];
+  data?:Partial<TModalDataMap[K]>;
 };
 
 export interface TModalDataMap {
