@@ -1,189 +1,340 @@
+import { useEffect, useState } from "react";
+import {
+    CreditCard,
+    Wallet,
+    ArrowLeft,
+    Clock,
+    AlertCircle,
+    User,
+    Phone,
+    Mail
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router";
-import { useState, useEffect } from "react";
-import { Check, Plus, Clock, Coffee, AlertCircle } from "lucide-react";
-import PageHeader from "../../../../components/reusables/page-header";
-import { Button } from "../../../../components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
-import { useFetchSingleOrder } from "../../../../api/queries/orders.query";
-import { TOrderResponseType } from "../../../../types/response.types";
-import { useUpdateOrderStatusMutation } from "../../../../api/mutations/orders.mutation";
 
-export type OrderStatus = "Pending" | "Preparing" | "Completed";
+import PageHeader from "../../../../../components/reusables/page-header";
+import { Button } from "../../../../../components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "../../../../../components/ui/card";
+import { Input } from "../../../../../components/ui/input";
+import { Label } from "../../../../../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../../../../../components/ui/radio-group";
+import { KHALTI } from "../../../../../constants/images";
+import { useFetchSingleOrder } from "../../../../../api/queries/orders.query";
+import { useCheckoutMutation, useInitiatePaymentMutation } from "../../../../../api/mutations/checkout.mutation";
 
-export default function SingleOrder() {
-  const [order, setOrder] = useState<TOrderResponseType | null>(null);
-  const { id: orderId } = useParams();
-  const { data, isLoading } = useFetchSingleOrder({ orderId: String(orderId) });
-  const { mutate } = useUpdateOrderStatusMutation({ orderId: String(orderId) });
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (data) setOrder(data);
-  }, [orderId, data]);
+type PaymentMethod = "cash" | "card" | "khalti" | "esewa";
 
-  const getStatusColor = (status: OrderStatus) => {
-    switch (status) {
-      case "Pending":
-        return "bg-yellow-500 hover:bg-yellow-600";
-      case "Preparing":
-        return "bg-blue-500 hover:bg-blue-600";
-      case "Completed":
-        return "bg-green-500 hover:bg-green-600";
-      default:
-        return "bg-gray-500 hover:bg-gray-600";
-    }
-  };
+interface CustomerInfo {
+    name: string;
+    phone: string;
+    email?: string;
+}
 
-  const getStatusAction = (currentStatus: OrderStatus) => {
-    switch (currentStatus) {
-      case "Pending":
-        return {
-          label: "Start Preparing",
-          icon: <Coffee className="h-4 w-4 mr-2" />,
-          nextStatus: "Preparing"
-        };
-      case "Preparing":
-        return {
-          label: "Mark Completed",
-          icon: <Check className="h-4 w-4 mr-2" />,
-          nextStatus: "Completed"
-        };
-      case "Completed":
-        return null;
-      default:
-        return null;
-    }
-  };
-
-  const handleStatusUpdate = (newStatus: OrderStatus) => {
-    mutate({ status: newStatus });
-  };
-  // const calculateItemTotal = (item: TOrderResponseType['items'][0]) => {
-  //   const dishTotal = Number(item.dish.price) * item.quantity;
-  //   const addonsTotal = item.add_ons.reduce((sum, addon) => 
-  //     sum + (Number(addon.price) * item.quantity), 0
-  //   );
-  //   return dishTotal + addonsTotal;
-  // };
-
-  // // Calculate order total
-  // const orderTotal = order?.items?.reduce((total, item) => 
-  //   total + calculateItemTotal(item), 0
-  // ) ?? 0;
-
-  if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-gray-200 rounded w-1/3" />
-        <div className="h-64 bg-gray-200 rounded" />
-      </div>
-    );
-  }
-
-  const statusAction = order?.status ? getStatusAction(order.status as OrderStatus) : null;
-
-  return (
-    <>
-      <PageHeader
-        title={`${order?.table.name} - Order #${orderId}`}
-        description={
-          <span className="text-sm text-gray-500">
-            <Clock className="inline mr-2 h-4 w-4" />
-            {new Date(order?.created_at || '').toLocaleString()}
-          </span>
+export default function OrderCheckout() {
+    const { id: orderId } = useParams();
+    const navigate = useNavigate();
+    const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>("cash");
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
+        name: "",
+        phone: "",
+        email: ""
+    });
+    const { mutate:checkoutMutate } = useCheckoutMutation({ orderId: String(orderId) });
+    const { mutate:khaltiPaymentMutate,data:khaltiResponse, isSuccess:khatiResponseSuccess} = useInitiatePaymentMutation();
+    
+    useEffect(() => {
+        if (selectedPayment === "khalti") {
+            khaltiPaymentMutate({
+                amount:(order?.total_amount * 100) || 0 ,
+                purchase_order_id: orderId || "",
+                purchase_order_name: `${order?.table.name} order` || "",
+                customer_name: customerInfo.name || "",
+                customer_phone:customerInfo.phone || "",
+                customer_email:customerInfo?.email || ""
+            })
         }
-      />
-      <div>
-        <div className="flex justify-between items-center">
-          <p className="font-medium">Order Details</p>
-          <div>
-            {!order?.checked_out && (
-              <Button variant="secondary" className="text-white">
-                <Plus className="h-4 w-4 mr-2" /> Add New Dishes
-              </Button>
-            )}
-          </div>
+    }, [selectedPayment])
+
+    const handleCustomerInfoChange = (field: keyof CustomerInfo) => (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setCustomerInfo(prev => ({
+            ...prev,
+            [field]: e.target.value
+        }));
+    };
+
+    console.log(khaltiResponse);
+
+    const { data: order, isFetching } = useFetchSingleOrder({ orderId: String(orderId) });
+    const handlePayment = async () => {
+        switch (selectedPayment) {
+            case 'khalti':
+                navigate(`/checkout/${orderId}/khalti`,{
+                    state:{
+                        pidx: khaltiResponse?.data.pidx,
+                        payment_url: khaltiResponse?.data.payment_url,
+                        expires_at: khaltiResponse?.data.expires_at,
+                        expires_in: khaltiResponse?.data.expires_in,
+                        amount: order.total_amount,
+                        customerInfo: customerInfo
+                    }
+                })
+                break;
+            default:
+                handleCheckout();
+        }
+    };
+
+    const handleCheckout = () => {
+        setIsProcessing(true);
+        try {
+            checkoutMutate({
+                total_amount: order.total_amount,
+                payment_method: selectedPayment,
+                customer_name: customerInfo.name,
+                customer_phone: customerInfo.phone, //TODO add zod validation here
+                customer_email: customerInfo?.email || ""
+            },{
+                onSuccess: () => {
+                    navigate(`/checkout/${orderId}/success`)
+                }
+            })
+            
+        } catch (error) {
+            console.error("Checkout failed:", error);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const isDigitalPayment = selectedPayment === 'khalti';
+    const isFormValid = customerInfo.name && customerInfo.phone;
+
+    if (isFetching) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-4xl mt-4">
+            <Button
+                variant="ghost"
+                className="mb-4"
+                onClick={() => navigate(`/orders/${orderId}`)}
+            >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Order
+            </Button>
+
+            <PageHeader
+                title="Checkout"
+                description={
+                    <span className="text-sm text-gray-500">
+                        <Clock className="inline mr-2 h-4 w-4" />
+                        Order #{orderId}
+                    </span>
+                }
+            />
+
+            <div className="grid gap-6 md:grid-cols-2">
+                {/* Order Summary */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Order Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="flex justify-between text-sm">
+                                <span>Table</span>
+                                <span className="font-medium">{order?.table.name}</span>
+                            </div>
+
+                            {order?.items?.map((item: any) => ( //TODO: refactor this type.
+                                <div key={item.dish.id} className="border-t pt-4">
+                                    <div className="flex justify-between">
+                                        <div>
+                                            <p className="font-medium">{item.dish.name}</p>
+                                            <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                                        </div>
+                                        <p className="font-medium">Rs. {Number(item.dish.price).toFixed(2)}</p>
+                                    </div>
+
+                                    {item.add_ons.length > 0 && (
+                                        <div className="mt-2 ml-4">
+                                            {item.add_ons.map((addon: any) => (
+                                                <div key={addon.id} className="flex justify-between text-sm text-gray-600">
+                                                    <span>+ {addon.name}</span>
+                                                    <span>Rs. {Number(addon.price).toFixed(2)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <p className="text-right text-sm text-gray-600 mt-2">
+                                        Subtotal: Rs. {item?.subtotal.toFixed(2)}
+                                    </p>
+                                </div>
+                            ))}
+
+                            {order?.remarks && (
+                                <div className="border-t pt-4">
+                                    <div className="flex items-start gap-2 text-amber-600">
+                                        <AlertCircle className="h-4 w-4 mt-0.5" />
+                                        <div>
+                                            <p className="font-medium text-sm">Special Instructions:</p>
+                                            <p className="text-sm">{order.remarks}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="border-t pt-4">
+                                <div className="flex justify-between font-medium">
+                                    <span>Total Amount</span>
+                                    <span>Rs. {order?.total_amount.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Payment Method */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Customer Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Name *
+                            </Label>
+                            <Input
+                                id="name"
+                                value={customerInfo.name}
+                                onChange={handleCustomerInfoChange('name')}
+                                placeholder="Enter customer name"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="phone" className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                Phone *
+                            </Label>
+                            <Input
+                                id="phone"
+                                value={customerInfo.phone}
+                                onChange={handleCustomerInfoChange('phone')}
+                                placeholder="Enter phone number"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="flex items-center gap-2">
+                                <Mail className="h-4 w-4" />
+                                Email
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={customerInfo.email}
+                                onChange={handleCustomerInfoChange('email')}
+                                placeholder="Enter email address (optional)"
+                            />
+                        </div>
+                    </CardContent>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Payment Method</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <RadioGroup
+                            defaultValue="cash"
+                            className="space-y-4"
+                            value={selectedPayment}
+                            onValueChange={(value) => setSelectedPayment(value as PaymentMethod)}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="cash" id="cash" />
+                                <Label htmlFor="cash" className="flex items-center gap-2">
+                                    <Wallet className="h-4 w-4" />
+                                    Cash Payment
+                                </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="card" id="card" />
+                                <Label htmlFor="card" className="flex items-center gap-2">
+                                    <CreditCard className="h-4 w-4" />
+                                    Card Payment
+                                </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="khalti" id="khalti" />
+                                <Label htmlFor="khalti" className="flex items-center gap-2">
+                                    <img src={KHALTI} alt="Khalti" className="h-4 w-4" />
+                                    Pay with Khalti
+                                </Label>
+                            </div>
+                        </RadioGroup>
+
+                        <div className="mt-6 space-y-4">
+                            <div className="border-t pt-4">
+                                <div className="flex justify-between font-medium">
+                                    <span>Total Amount</span>
+                                    <span>Rs. {order?.total_amount.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            {
+                                isDigitalPayment ? (
+                                    <Button
+                                    className="w-full"
+                                    onClick={handlePayment}
+                                    disabled={!khatiResponseSuccess || !isFormValid }
+                                >
+                                    {!khatiResponseSuccess ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                            Processing...
+                                        </div>
+                                    ) : (
+                                        <>
+                                            Proceed to Payment - Rs. {order?.total_amount.toFixed(2)}
+                                        </>
+                                    )}
+                                </Button>
+                                ) : (
+                                    <Button
+                                    className="w-full"
+                                    onClick={handlePayment}
+                                    disabled={isProcessing || !isFormValid }
+                                >
+                                    {isProcessing ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                            Processing...
+                                        </div>
+                                    ) : (
+                                        <>
+                                            Complete Payment - Rs. {order?.total_amount.toFixed(2)}
+                                        </>
+                                    )}
+                                </Button>
+                                )
+                            }
+                            {!isFormValid && (
+                                <p className="text-sm text-red-500">
+                                    * Please fill in required customer information
+                                </p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
-
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center text-lg">
-              <span>Table: {order?.table.name}</span>
-              <Badge className={`${order?.status ? getStatusColor(order.status as OrderStatus) : ''}`}>
-                {order?.status}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {order?.items.map((item) => (
-                <div key={item.dish.id} className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <div>
-                      <h3 className="text-base font-semibold">{item.dish.name}</h3>
-                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                    </div>
-                    <span>Rs. {Number(item.dish.price).toFixed(2)}</span>
-                  </div>
-
-                  {item.add_ons.length > 0 && (
-                    <div className="ml-4 bg-gray-50 p-2 rounded">
-                      <h4 className="text-sm font-medium mb-1">Add-ons:</h4>
-                      <ul className="space-y-1">
-                        {item.add_ons.map((addon) => (
-                          <li key={addon.id} className="text-sm flex justify-between">
-                            <span>{addon.name}</span>
-                            <span>Rs. {Number(addon.price).toFixed(2)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end mt-2">
-                    <p className="text-sm text-gray-600">
-                      Subtotal: Rs. {item.subtotal.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {order?.remarks && (
-              <div className="border-t pt-4">
-                <div className="flex items-start gap-2 text-amber-600">
-                  <AlertCircle className="h-4 w-4 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-sm">Special Instructions:</p>
-                    <p className="text-sm">{order.remarks}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-between items-center mt-4 pt-2 border-t">
-              <p className="text-lg font-semibold">
-                Total: Rs. {order?.total_amount.toFixed(2)}
-              </p>
-              <div className="flex gap-3">
-                {statusAction && (
-                  <Button
-                    className={getStatusColor(order?.status as OrderStatus)}
-                    onClick={() => handleStatusUpdate(statusAction.nextStatus as OrderStatus)}
-                  >
-                    {statusAction.icon}
-                    {statusAction.label}
-                  </Button>
-                )}
-                {order?.status === "Completed" && (
-                  <Button onClick={()=>navigate(`/orders/${orderId}/checkout`)}>Checkout</Button>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
+    );
 }

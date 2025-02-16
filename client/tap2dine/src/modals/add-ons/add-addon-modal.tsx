@@ -17,7 +17,7 @@ export default function AddAddon() {
       price: 0,
     },
   });
-  const { mutate } = useAddAddonMutation();
+  const { mutate,isLoading } = useAddAddonMutation();
   const onSubmit = (data: TAddonType) => {
     mutate(data, {
       onSuccess: () => {
@@ -60,7 +60,7 @@ export default function AddAddon() {
               >
                 Reset
               </Button>
-              <Button className="w-full mt-4">Submit</Button>
+              <Button className="w-full mt-4" disabled={isLoading}>Submit</Button>
             </div>
           </form>
         </Form>

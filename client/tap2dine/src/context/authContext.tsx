@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/test-auth/`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}test-auth/`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

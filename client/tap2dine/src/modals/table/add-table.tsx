@@ -16,7 +16,7 @@ export default function AddTable() {
       name: "",
     },
   });
-  const { mutate } = useAddTableMutation();
+  const { mutate,isLoading } = useAddTableMutation();
   const onSubmit = (data: TTableType) => {
     mutate(data, {
       onSuccess: () => {
@@ -53,7 +53,7 @@ export default function AddTable() {
               </Button>
               <Button
                 className="w-full mt-4"
-                disabled={!form.formState.isValid}
+                disabled={!form.formState.isValid || isLoading}
               >
                 Submit
               </Button>

@@ -21,7 +21,7 @@ export default function EditCategory({
       description: data?.description,
     },
   });
-  const { mutate } = useEditCategoryMutation({
+  const { mutate,isLoading } = useEditCategoryMutation({
     initiatorName: initiatorName || "",
   });
   const onSubmit = (data: TCategoryType) => {
@@ -68,7 +68,7 @@ export default function EditCategory({
               </Button>
               <Button
                 className="w-full mt-4"
-                disabled={!form.formState.isDirty || !form.formState.isValid}
+                disabled={!form.formState.isDirty || !form.formState.isValid || isLoading}
               >
                 Edit
               </Button>

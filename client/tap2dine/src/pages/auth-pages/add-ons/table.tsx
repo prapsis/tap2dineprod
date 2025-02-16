@@ -4,12 +4,14 @@ import { columns } from "./column";
 import { Plus } from "lucide-react";
 import useModalContext from "../../../hooks/useModalContext";
 import { useFetchAddons } from "../../../api/queries/addons.query";
+import TableFetchLoader from "../../../components/reusables/table-fetch-loader";
 
 export default function AddonTable() {
   const { openModal } = useModalContext();
-
-  const { data } = useFetchAddons();
-  return (
+  const { data, isLoading } = useFetchAddons();
+  return isLoading ? (
+    <TableFetchLoader/>
+  ) : (
     <div>
       <DataTable
         columns={columns}

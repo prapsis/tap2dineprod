@@ -21,7 +21,7 @@ export default function EditAddon({
       price: data?.price || 0,
     },
   });
-  const { mutate } = useEditAddonMutation({
+  const { mutate,isLoading } = useEditAddonMutation({
     initiatorName: initiatorName || "",
   });
   const onSubmit = (data: TAddonType) => {
@@ -69,7 +69,7 @@ export default function EditAddon({
               </Button>
               <Button
                 className="w-full mt-4"
-                disabled={!form.formState.isDirty || !form.formState.isValid}
+                disabled={!form.formState.isDirty || !form.formState.isValid || isLoading}
               >
                 Edit
               </Button>

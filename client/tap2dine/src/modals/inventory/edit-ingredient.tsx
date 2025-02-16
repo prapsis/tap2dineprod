@@ -21,7 +21,7 @@ export default function EditIngredient({
       quantity_available: data?.quantity_available || 0,
     },
   });
-  const { mutate } = useEditIngredientMutation({
+  const { mutate,isLoading } = useEditIngredientMutation({
     initiatorName: initiatorName || "",
   });
   const onSubmit = (data: TIngredientType) => {
@@ -68,7 +68,7 @@ export default function EditIngredient({
               </Button>
               <Button
                 className="w-full mt-4"
-                disabled={!form.formState.isDirty || !form.formState.isValid}
+                disabled={!form.formState.isDirty || !form.formState.isValid || isLoading}
               >
                 Edit
               </Button>

@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { api, noAuthApi } from "../api";
 import { useMutation } from '@tanstack/react-query'
 import { toastTrigger } from "../../lib/utils";
 import { TLoginType } from "../../schemas/login";
@@ -20,7 +20,7 @@ export const useLoginMutation = () => {
 export const useRegisterMutation = () => {
     const navigate = useNavigate()
     const registerMutation = useMutation({
-        mutationFn: (data:TRegisterType) => api.post('/register/', data),
+        mutationFn: (data:TRegisterType) => noAuthApi.post('/register/', data),
         onSuccess: () => {
             toastTrigger('Registration successful', undefined,'success');
             navigate('/auth');

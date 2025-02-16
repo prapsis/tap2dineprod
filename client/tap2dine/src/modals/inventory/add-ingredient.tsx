@@ -17,7 +17,7 @@ export default function AddIngredient() {
       quantity_available: 0,
     },
   });
-  const { mutate } = useAddIngredientMutation();
+  const { mutate,isLoading } = useAddIngredientMutation();
   const onSubmit = (data: TIngredientType) => {
     mutate(data, {
       onSuccess: () => {
@@ -60,7 +60,7 @@ export default function AddIngredient() {
               >
                 Reset
               </Button>
-              <Button className="w-full mt-4">Submit</Button>
+              <Button className="w-full mt-4" disabled={isLoading}>Submit</Button>
             </div>
           </form>
         </Form>

@@ -1,9 +1,10 @@
+import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { DIGITAL_MENU_LOGO, GIRL_ONLINE_ORDER, RESTAURANT } from "../../constants/images"
 import RegisterForm from "./_components/register-form";
 
 export default function RegisterPage() {
-
+    const navigate = useNavigate();
     return (
         <div className="w-full h-screen bg-background flex flex-col justify-center items-center relative">
             <div className="absolute left-0 bottom-0 z-10">
@@ -18,7 +19,7 @@ export default function RegisterPage() {
                 </div>
                 <RegisterForm /> 
             </div>
-            <p className="text-xs z-40">Go Back to <Button variant={"link"} className="underline underline-offset-4 font-semibold text-xs" onClick={() => window.location.href = "/login"}>Login</Button></p>
+            <p className="text-xs z-40">Go Back to <Button variant={"link"} className="underline underline-offset-4 font-semibold text-xs" onClick={() => navigate("/login")}>Login</Button></p>
         </div>
     )
 }

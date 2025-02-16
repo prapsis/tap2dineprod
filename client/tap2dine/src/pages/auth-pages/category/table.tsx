@@ -4,12 +4,15 @@ import { columns } from "./column";
 import { Plus } from "lucide-react";
 import { useFetchCategories } from "../../../api/queries/category.query";
 import useModalContext from "../../../hooks/useModalContext";
+import TableFetchLoader from "../../../components/reusables/table-fetch-loader";
 
 export default function CategoryTable() {
   const { openModal } = useModalContext();
 
-  const { data } = useFetchCategories();
-  return (
+  const { data,isLoading } = useFetchCategories();
+  return isLoading ? (
+      <TableFetchLoader/>
+    ) : (
     <div>
       <DataTable
         columns={columns}

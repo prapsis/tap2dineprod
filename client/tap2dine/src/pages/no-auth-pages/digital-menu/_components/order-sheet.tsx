@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 const OrderSheet = () => {
     const { order, dispatch } = useOrderContext();
-    const { mutate } = useAddOrderMutation();
+    const { mutate, isLoading } = useAddOrderMutation();
     const [isDownloadable, setIsDownloadable] = useState(false);
 
     const totalPrice = order.items.reduce((sum, item) => {
@@ -152,6 +152,7 @@ Total: Rs. ${totalPrice}
                             <Button
                                 className="w-full"
                                 onClick={handlePlaceOrder}
+                                disabled={isLoading}
                             >
                                 Place Order
                             </Button>

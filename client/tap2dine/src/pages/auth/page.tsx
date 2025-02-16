@@ -1,10 +1,11 @@
+import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { DIGITAL_MENU_LOGO, GIRL_ONLINE_ORDER, RESTAURANT } from "../../constants/images"
 import LoginForm from "./_components/login-form";
 
 
 export default function LoginPage() {
-
+    const navigate = useNavigate();
     return (
         <div className="w-full h-screen bg-background flex flex-col justify-center items-center relative">
             <div className="absolute left-0 bottom-0 z-10">
@@ -19,7 +20,7 @@ export default function LoginPage() {
                 </div>
                 <LoginForm />
             </div>
-            <p className="text-xs z-40">Don&apos;t have an account? <Button variant="link" onClick={() => window.location.href = "/register"} className="underline underline-offset-4 font-semibold text-xs">Sign Up</Button></p>
+            <p className="text-xs z-40">Don&apos;t have an account? <Button variant="link" onClick={() => navigate("/register")} className="underline underline-offset-4 font-semibold text-xs">Sign Up</Button></p>
         </div>
     )
 }

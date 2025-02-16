@@ -5,6 +5,7 @@ channels==4.2.0
 channels_redis==4.2.1
 charset-normalizer==3.4.1
 click==8.1.8
+dj-database-url==2.3.0
 Django==5.1.4
 django-cors-headers==4.6.0
 djangorestframework==3.15.2
@@ -15,6 +16,8 @@ idna==3.10
 msgpack==1.1.0
 pillow==11.0.0
 PyJWT==2.10.1
+PyMySQL==1.1.1
+python-decouple==3.8
 python-dotenv==1.0.1
 PyYAML==6.0.2
 qrcode==8.0

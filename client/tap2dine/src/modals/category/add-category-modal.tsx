@@ -17,7 +17,7 @@ export default function AddCategory() {
             description: ""
         }
     });
-    const { mutate } = useAddCategoryMutation();
+    const { mutate,isLoading } = useAddCategoryMutation();
     const onSubmit = (data: TCategoryType) => {
         mutate(data, {
             onSuccess: () => {
@@ -51,7 +51,7 @@ export default function AddCategory() {
                         />
                         <div className='flex justify-end gap-3'>
                             <Button variant={"outline"} className="w-full mt-4" onClick={() => form.reset()}>Reset</Button>
-                            <Button className="w-full mt-4">Submit</Button>
+                            <Button className="w-full mt-4" disabled={isLoading}>Submit</Button>
                         </div>
                     </form>
                 </Form>

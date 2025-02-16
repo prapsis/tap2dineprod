@@ -20,7 +20,7 @@ export default function EditTable({
       name: data?.name || "",
     },
   });
-  const { mutate } = useEditTableMutation({
+  const { mutate, isLoading } = useEditTableMutation({
     initiatorName: initiatorName || "",
   });
   const onSubmit = (data: TTableType) => {
@@ -60,7 +60,7 @@ export default function EditTable({
               </Button>
               <Button
                 className="w-full mt-4"
-                disabled={!form.formState.isDirty || !form.formState.isValid}
+                disabled={!form.formState.isDirty || !form.formState.isValid || isLoading}
               >
                 Edit
               </Button>
