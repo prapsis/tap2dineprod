@@ -1,0 +1,191 @@
+
+:root {
+    --primary: #9DC516;      /* Lime green from image */
+    --secondary: #000000;    /* Black */
+    --accent: #FF4B4B;       /* Red accent from logo */
+    --light: #FFFFFF;        /* White */
+    --dark: #000000;         /* Black */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    color: var(--dark);
+    background-color: var(--primary);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+header {
+    background: var(--dark);
+    padding: 20px 0;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--light);
+}
+
+/* Hero Section */
+.hero {
+    padding: 100px 0;
+    background: var(--primary);
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: var(--dark);
+}
+
+.hero p {
+    font-size: 20px;
+    color: var(--dark);
+    margin-bottom: 40px;
+}
+
+/* Features */
+.features {
+    padding: 80px 0;
+    background: var(--dark);
+    color: var(--light);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.feature-card {
+    padding: 30px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.feature-card i {
+    font-size: 40px;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+/* Pricing */
+.pricing {
+    padding: 80px 0;
+    background: var(--primary);
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.pricing-card {
+    padding: 40px;
+    border-radius: 10px;
+    background: var(--dark);
+    color: var(--light);
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.price-tag {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--primary);
+    margin: 20px 0;
+}
+
+/* Contact */
+.contact {
+    padding: 80px 0;
+    background: var(--dark);
+    color: var(--light);
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 15px 30px;
+    background: var(--dark);
+    color: var(--light);
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.hero .btn {
+    background: var(--dark);
+    color: var(--light);
+}
+
+.pricing-card .btn {
+    background: var(--primary);
+    color: var(--dark);
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-title h2 {
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.features .section-title p,
+.contact .section-title p {
+    color: var(--light);
+}
+
+.pricing .section-title p {
+    color: var(--dark);
+}
+
+ul {
+    list-style: none;
+    margin: 20px 0;
+}
+
+li {
+    margin: 10px 0;
+}
+
+footer {
+    background: var(--dark);
+    color: var(--light);
+    padding: 40px 0;
+    text-align: center;
+}
+
+.logo-icon {
+    margin-right: 10px;
+}
