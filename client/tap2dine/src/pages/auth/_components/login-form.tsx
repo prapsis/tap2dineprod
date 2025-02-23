@@ -8,6 +8,7 @@ import { useLoginMutation } from "../../../api/mutations/auth.mutation";
 import useAuthContext from "../../../hooks/useAuthContext";
 import { toastTrigger } from "../../../lib/utils";
 import { useNavigate } from "react-router";
+import { Loader2 } from "lucide-react";
 
 
 export default function LoginForm() {
@@ -61,7 +62,7 @@ export default function LoginForm() {
                         />
                     
                     
-                    <Button className="w-full mt-4" disabled={isLoading}>Login</Button>
+                    <Button className="w-full mt-4" disabled={isLoading}>{isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Login"}</Button>
                 </form>
             </Form>
         </div>

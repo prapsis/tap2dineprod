@@ -23,7 +23,7 @@ export const useRegisterMutation = () => {
         mutationFn: (data:TRegisterType) => noAuthApi.post('/register/', data),
         onSuccess: () => {
             toastTrigger('Registration successful', undefined,'success');
-            navigate('/auth');
+            navigate('/login');
         },
         onError: () => {
             toastTrigger('Registration failed', undefined,'error');

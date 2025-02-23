@@ -5,6 +5,7 @@ import {Form} from "../../../components/ui/form";
 import FormInput from "../../../components/reusables/form-input";
 import { registerSchema, TRegisterType } from "../../../schemas/register";
 import { useRegisterMutation } from "../../../api/mutations/auth.mutation";
+import { Loader2 } from "lucide-react";
 
 
 export default function RegisterForm() {
@@ -65,7 +66,7 @@ export default function RegisterForm() {
                         placeholder="Password"
                         required
                         />
-                    <Button className="w-full mt-4" disabled={isLoading}>Register</Button>
+                    <Button className="w-full mt-4" disabled={isLoading}>{isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Register"}</Button>
                 </form>
             </Form>
         </div>
