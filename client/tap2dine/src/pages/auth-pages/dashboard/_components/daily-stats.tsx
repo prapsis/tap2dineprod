@@ -8,11 +8,11 @@ import { TOrderResponseType } from '../../../../types/response.types'
 export function DailyStats({data:orders}:{data:TOrderResponseType[]}) {
     // Calculate statistics for today's orders
     const stats = useMemo(() => {
-        // Get today's date (in the same format as created_at)
+        const checkedOutOrders = orders.filter(order => order.checked_out)
         const today = new Date().toISOString().split('T')[0]
 
         // Filter orders for today
-        const todaysOrders = orders.filter(order =>
+        const todaysOrders = checkedOutOrders.filter(order =>
             order.created_at.startsWith(today)
         )
 
