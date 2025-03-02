@@ -26,27 +26,17 @@ export function DailyStats({data:orders}:{data:TOrderResponseType[]}) {
         // Total orders today
         const totalOrders = todaysOrders.length
 
-        // Hourly revenue data for today
-        const hourlyRevenueData = todaysOrders.reduce((acc, order) => {
-            const hour = new Date(order.created_at).getHours()
-            const existingHour = acc.find(item => item.hour === hour)
-
-            if (existingHour) {
-                existingHour.revenue += parseFloat(order.total_amount.toString())
-            } else {
-                acc.push({
-                    hour: hour,
-                    revenue: parseFloat(order.total_amount.toString())
-                })
-            }
-
-            return acc
-        }, [] as { hour: number, revenue: number }[])
-            .sort((a, b) => a.hour - b.hour)
-            .map(item => ({
-                hour: `${item.hour}:00`,
-                revenue: item.revenue
-            }))
+       // Hourly revenue data for today
+        const hourlyRevenueData = Array.from({ length: 24 }, (_, hour) => ({
+            hour: `${hour}:00`,
+            revenue: 0
+          }));
+          
+          // Fill in revenue data for hours that have orders
+          todaysOrders.forEach(order => {
+            const hour = new Date(order.created_at).getHours();
+            hourlyRevenueData[hour].revenue += parseFloat(order.total_amount.toString());
+          });
 
         return {
             totalRevenue,
