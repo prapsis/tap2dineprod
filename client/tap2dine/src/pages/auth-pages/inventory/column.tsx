@@ -44,7 +44,7 @@ export const columns: ColumnDef<TIngredientResponseType>[] = [
   },
   {
     accessorKey: "quantity_available",
-    header: "Quantity available",
+    header: "Quantity available(in gm/ml)",
   },
   {
     id: "actions",

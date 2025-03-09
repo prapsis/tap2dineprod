@@ -34,7 +34,8 @@ export default function EditDish() {
   //     icon?: React.ComponentType<{ className?: string }>;
   //   }[]
   // >([]);
-
+  console.log(ingredientsData);
+  console.log(dishData);
   const isLoading =
     isDishLoading ||
     isIngredientsLoading ||

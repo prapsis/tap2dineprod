@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-
+from rest_framework.exceptions import ValidationError
 from .utils import notify_order_created
-from .models import Table ,Dish, Ingredient, AddOn, Order,Category,OrderItem
+from .models import Table ,Dish, Ingredient, AddOn, Order,Category,OrderItem,DishIngredient
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,26 +54,100 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'description']
 
+class DishIngredientSerializer(serializers.ModelSerializer):
+    ingredient = IngredientSerializer(read_only=True)
+
+    class Meta:
+        model = DishIngredient
+        fields = ['ingredient', 'quantity_required']
+
 class DishSerializer(serializers.ModelSerializer):
-    ingredients = IngredientSerializer(many=True, read_only=True)
+    dish_ingredients = DishIngredientSerializer(many=True, read_only=True)
     add_ons = AddOnSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
+
     class Meta:
         model = Dish
-        fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons','category']
+        fields = ['id', 'name', 'description', 'price', 'dish_ingredients', 'add_ons', 'category']
+
+class DishIngredientWriteSerializer(serializers.Serializer):
+    ingredient = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())  # This handles the reference to Ingredient model
+    quantity_required = serializers.IntegerField()
+
+    class Meta:
+        fields = ['ingredient', 'quantity_required']
+
 
 class DishWriteSerializer(serializers.ModelSerializer):
-    ingredients = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Ingredient.objects.all()
-    )
-    add_ons = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=AddOn.objects.all()
-    )
+    ingredients = DishIngredientWriteSerializer(many=True, write_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    add_ons = serializers.PrimaryKeyRelatedField(many=True, queryset=AddOn.objects.all(), required=False)
+
     class Meta:
         model = Dish
-        fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons','category']
+        fields = ['id', 'name', 'description', 'price', 'ingredients', 'add_ons', 'category']
 
+    def create(self, validated_data):
+        ingredients_data = validated_data.pop('ingredients')
+        add_ons_data = validated_data.pop('add_ons', [])
+        
+        # Create the dish first
+        dish = Dish.objects.create(**validated_data)
+        
+        # Now create the related DishIngredient entries
+        for ingredient_data in ingredients_data:
+            ingredient_obj = ingredient_data['ingredient']
+            quantity = ingredient_data['quantity_required']
+            
+            DishIngredient.objects.create(
+                dish=dish,
+                ingredient=ingredient_obj,
+                quantity_required=quantity
+            )
+        
+        # Set many-to-many relationships
+        if add_ons_data:
+            dish.add_ons.set(add_ons_data)
+            
+        return dish
+    
+    def update(self, instance, validated_data):
+        # Extract nested data
+        ingredients_data = validated_data.pop('ingredients', None)
+        add_ons_data = validated_data.pop('add_ons', None)
+        
+        # Update the dish basic fields
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.price = validated_data.get('price', instance.price)
+        instance.category = validated_data.get('category', instance.category)
+        instance.save()
+        
+        # Update ingredients if provided
+        if ingredients_data is not None:
+            # Clear existing ingredients
+            DishIngredient.objects.filter(dish=instance).delete()
+            
+            # Create new ingredient relationships
+            for ingredient_data in ingredients_data:
+                ingredient_obj = ingredient_data['ingredient']
+                quantity = ingredient_data['quantity_required']
+                
+                DishIngredient.objects.create(
+                    dish=instance,
+                    ingredient=ingredient_obj,
+                    quantity_required=quantity
+                )
+        
+        # Update add-ons if provided
+        if add_ons_data is not None:
+            instance.add_ons.set(add_ons_data)
+        
+        return instance
+    def to_representation(self, instance):
+        # Return the dish using the read serializer to avoid the error
+        return DishSerializer(instance, context=self.context).data
+    
 class OrderItemSerializer(serializers.ModelSerializer):
     dish = serializers.PrimaryKeyRelatedField(queryset=Dish.objects.all())
     add_ons = serializers.PrimaryKeyRelatedField(
@@ -108,17 +182,20 @@ class OrderSerializer(serializers.ModelSerializer):
             order_item.save()
 
             # Deduct ingredients based on quantity
-            for ingredient in dish.ingredients.all():
-                if ingredient.quantity_available < quantity:
+            for dish_ingredient in dish.dish_ingredients.all():
+                required_qty = dish_ingredient.quantity_required * quantity
+                ingredient = dish_ingredient.ingredient
+
+                if ingredient.quantity_available < required_qty:
                     raise serializers.ValidationError(
                         f"Insufficient stock for ingredient {ingredient.name}."
                     )
-                ingredient.quantity_available -= quantity
+                ingredient.quantity_available -= required_qty
                 ingredient.save()
 
         notify_order_created(order)
-
         return order
+
 
 class OrderItemReadSerializer(serializers.ModelSerializer):
     dish = DishSerializer(read_only=True)

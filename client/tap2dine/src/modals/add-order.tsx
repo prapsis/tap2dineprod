@@ -12,7 +12,7 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
   const {dispatch} = useOrderContext();
   const [quantity, setQuantity] = useState(1);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>(
-    dish?.ingredients?.map((ing) => ing.id) || []
+    dish?.dish_ingredients?.map((ing) => ing.ingredient.id) || []
   );
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
@@ -47,10 +47,10 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
       quantity: quantity,
       price: Number(dish?.price),
       totalPrice:Number(totalPrice),
-      ingredients: dish?.ingredients?.map(ing => ({
-        id: ing.id,
-        name: ing.name,
-        include: selectedIngredients.includes(ing.id)
+      ingredients: dish?.dish_ingredients?.map(ing => ({
+        id: ing.ingredient.id,
+        name: ing.ingredient.name,
+        include: selectedIngredients.includes(ing.ingredient.id)
       })) || [],
       addons: dish?.add_ons?.filter(addon => selectedAddons.includes(addon.id))
         .map(addon => ({
@@ -67,7 +67,7 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
 
     closeModal("ADD_ORDER");
   };
-  
+
   return (
     <>
       <div className="grid gap-4 py-4">
@@ -99,19 +99,19 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
         <div>
           <h3 className="text-lg font-semibold mb-2">Customize Ingredients</h3>
           <div className="space-y-2">
-            {dish?.ingredients?.length ? (
-              dish.ingredients.map((ingredient) => (
-                <div key={ingredient.id} className="flex items-center space-x-2">
+            {dish?.dish_ingredients?.length ? (
+              dish.dish_ingredients.map((ing) => (
+                <div key={ing.ingredient.id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`ingredient-${ingredient.id}`}
-                    checked={selectedIngredients.includes(ingredient.id)}
-                    onCheckedChange={() => handleIngredientToggle(ingredient.id)}
+                    id={`ingredient-${ing.ingredient.id}`}
+                    checked={selectedIngredients.includes(ing.ingredient.id)}
+                    onCheckedChange={() => handleIngredientToggle(ing.ingredient.id)}
                   />
                   <label
-                    htmlFor={`ingredient-${ingredient.id}`}
+                    htmlFor={`ingredient-${ing.ingredient.id}`}
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {ingredient.name}
+                    {ing.ingredient.name}
                   </label>
                 </div>
               ))

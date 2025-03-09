@@ -1,26 +1,25 @@
-import { useForm } from 'react-hook-form';
-import { dishSchema, TDishType } from '../../../../schemas/dish';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form } from '../../../../components/ui/form';
-import { Button } from '../../../../components/ui/button';
-import { MultiSelect } from '../../../../components/reusables/multi-select';
-import FormInput from '../../../../components/reusables/form-input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "../../../../components/ui/select";
-import { useEditDishMutation } from '../../../../api/mutations/dish.mutation';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import { useState } from "react";
+import { useEditDishMutation } from "../../../../api/mutations/dish.mutation";
+import { Button } from "../../../../components/ui/button";
+import { TDishType, dishSchema } from "../../../../schemas/dish";
 import {
     TAddonResopnseType,
     TCategoryResopnseType,
-    TDishResponseType,
     TIngredientResponseType,
+    TDishResponseType,
 } from "../../../../types/response.types";
-import { useNavigate } from 'react-router';
+import FormInput from "../../../../components/reusables/form-input";
+import { Form } from "../../../../components/ui/form";
+import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
+import { Card, CardContent } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Checkbox } from "../../../../components/ui/checkbox";
+import { Trash, Plus } from "lucide-react";
 
 type TEditDishFormProps = {
     dishId: string;
@@ -28,32 +27,31 @@ type TEditDishFormProps = {
     categories: TCategoryResopnseType[];
     addons: TAddonResopnseType[];
     ingredients: TIngredientResponseType[];
-}
-export default function EditDishForm({
-    dishId, dishData, categories, addons, ingredients
-}: TEditDishFormProps) {
+};
+
+export default function EditDishForm({ dishId, dishData, categories, addons, ingredients }: TEditDishFormProps) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
     const form = useForm<TDishType>({
         resolver: zodResolver(dishSchema),
-        mode: "onChange",
-        values: {
-            name: dishData?.name || "",
-            description: dishData?.description || "",
-            price: dishData?.price || 0,
-            ingredients: dishData.ingredients?.map((ingredient: TIngredientResponseType) =>
-                ingredient.id.toString(),
-            ) || [],
-            add_ons: dishData.add_ons?.map((addon: TAddonResopnseType) =>
-                addon.id.toString(),
-            ) || [],
+        defaultValues: {
+            name: dishData.name || "",
+            description: dishData.description || "",
+            price: dishData.price || 0,
+            ingredients: dishData.dish_ingredients?.map(i => ({ ingredient: i.ingredient.id.toString(), quantity_required: i.quantity_required })) || [],
+            add_ons: dishData.add_ons?.map(a => Number(a.id)) || [],
             category: dishData.category?.id.toString() || "",
         },
+        mode: "onChange",
     });
+
+    const { fields, append, remove } = useFieldArray({ name: "ingredients", control: form.control });
+    const [selectedAddons, setSelectedAddons] = useState<number[]>(form.getValues("add_ons") || []);
+
     const { mutate } = useEditDishMutation({ initiatorName: dishId });
 
     const onSubmit = (data: TDishType) => {
-        console.log("Submitting data:", data);
         mutate(data, {
             onSuccess: () => {
                 navigate("/menu");
@@ -61,113 +59,58 @@ export default function EditDishForm({
             },
         });
     };
-    return (
-        <div>
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="w-full space-y-4 mt-3"
-                >
-                    <FormInput
-                        label="Dish Name"
-                        form={form}
-                        name="name"
-                        type="text"
-                        placeholder="Dish"
-                        required
-                    />
 
-                    <FormInput
-                        label="Description"
-                        form={form}
-                        name="description"
-                        type="text"
-                        placeholder="Description.."
-                    />
-                    <FormInput
-                        label="Price"
-                        form={form}
-                        name="price"
-                        type="number"
-                        placeholder="0.00"
-                        required
-                    />
-                    <FormInput
-                        label="Category"
-                        form={form}
-                        name="category"
-                        render={(field) => (
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value?.toString()}
-                                value={field.value?.toString()}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {categories?.map((category: TCategoryResopnseType) => (
-                                        <SelectItem
-                                            key={category.id}
-                                            value={category.id.toString()}
-                                        >
-                                            {category.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        )}
-                        required
-                    />
-                    <FormInput
-                        label="Select Ingredients"
-                        form={form}
-                        name="ingredients"
-                        render={(field) => (
-                            <MultiSelect
-                                options={ingredients.map((ingredient: TIngredientResponseType) => ({
-                                    label: ingredient.name,
-                                    value: ingredient.id.toString(),
-                                }))}
-                                defaultValue={field.value as string[] || []}
-                                onValueChange={field.onChange}
-                                placeholder="Select Ingredients"
-                                variant="inverted"
-                            />
-                        )}
-                    />
-                    <FormInput
-                        label="Select Addons"
-                        form={form}
-                        name="add_ons"
-                        render={(field) => {
-                            console.log(field.value)
-                            return(<MultiSelect
-                                options={addons?.map((addon: TAddonResopnseType) => ({
-                                    label: addon.name,
-                                    value: addon.id.toString(),
-                                })) || []}
-                                defaultValue={field.value as string[] || []}
-                                onValueChange={field.onChange}
-                                placeholder="Select Addons"
-                                variant="inverted"
-                            />)
-                        }}
-                    />
+    return (
+        <div className="w-full max-w-2xl border rounded-md p-4">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormInput label="Dish Name" form={form} name="name" type="text" placeholder="Dish" required />
+                    <FormInput label="Description" form={form} name="description" type="text" placeholder="Description.." />
+                    <FormInput label="Price" form={form} name="price" type="number" placeholder="0.00" required />
+
+                    <FormInput label="Category" form={form} name="category" render={(field) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value as string}>
+                            <SelectTrigger className="w-full"><SelectValue placeholder="Select a category" /></SelectTrigger>
+                            <SelectContent>
+                                {categories.map(category => <SelectItem key={category.id} value={category.id.toString()}>{category.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    )} required />
+
+                    <Label>Ingredients</Label>
+                    {fields.map((field, index) => (
+                        <Card key={field.id} className="p-2">
+                            <CardContent className="flex items-center gap-3 p-2">
+                                <Select onValueChange={(value) => form.setValue(`ingredients.${index}.ingredient`, value)} value={field.ingredient}>
+                                    <SelectTrigger><SelectValue placeholder="Select ingredient" /></SelectTrigger>
+                                    <SelectContent>
+                                        {ingredients.map(ingredient => <SelectItem key={ingredient.id} value={ingredient.id.toString()}>{ingredient.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <Input type="number" {...form.register(`ingredients.${index}.quantity_required`, { valueAsNumber: true })} placeholder="Quantity" />
+                                <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}><Trash className="h-4 w-4" /></Button>
+                            </CardContent>
+                        </Card>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ ingredient: "", quantity_required: 1 })}><Plus className="h-4 w-4 mr-2" /> Add Ingredient</Button>
+
+                    <Label>Add-ons</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {addons.map(addon => (
+                            <div key={addon.id} className="flex items-center space-x-2">
+                                <Checkbox id={`addon-${addon.id}`} checked={selectedAddons.includes(Number(addon.id))} onCheckedChange={checked => setSelectedAddons(prev => checked ? [...prev, Number(addon.id)] : prev.filter(id => id !== Number(addon.id)))} />
+                                <Label htmlFor={`addon-${addon.id}`}>{addon.name} (${addon.price})</Label>
+                            </div>
+                        ))}
+                    </div>
+
                     <div className="flex justify-end gap-3">
-                        <Button
-                            variant="outline"
-                            className="w-full mt-4"
-                            onClick={() => form.reset()}
-                        >
-                            Reset
-                        </Button>
-                        <Button className="w-full mt-4" type="submit">
-                            Submit
-                        </Button>
+                        <Button variant="outline" className="w-full mt-4" onClick={() => form.reset()}>Reset</Button>
+                        <Button className="w-full mt-4" type="submit" disabled={!form.formState.isValid}>Submit</Button>
                     </div>
                 </form>
             </Form>
         </div>
-    )
+    );
 }
+

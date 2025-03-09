@@ -65,8 +65,6 @@ export default function OrderCheckout() {
         }));
     };
 
-    console.log(khaltiResponse);
-
     const { data: order, isFetching } = useFetchSingleOrder({ orderId: String(orderId) });
     const handlePayment = async () => {
         switch (selectedPayment) {

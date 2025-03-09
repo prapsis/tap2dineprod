@@ -7,13 +7,22 @@ class Table(models.Model):
     def __str__(self):
         return self.name
 
+class DishIngredient(models.Model):
+    dish = models.ForeignKey('Dish', on_delete=models.CASCADE, related_name='dish_ingredients')
+    ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='dish_ingredients')
+    quantity_required = models.PositiveIntegerField(default=1)  # Quantity required per dish
+
+    def __str__(self):
+        return f"{self.ingredient.name} in {self.dish.name} ({self.quantity_required})"
+
 class Dish(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    ingredients = models.ManyToManyField('Ingredient', related_name='dishes', blank=True)
+    ingredients = models.ManyToManyField('Ingredient', through='DishIngredient', related_name='dishes')
     add_ons = models.ManyToManyField('AddOn', related_name='dishes', blank=True)
-    category = models.ForeignKey('Category', on_delete=models.SET_NULL,null=True, related_name='dishes')
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, related_name='dishes')
+
     def __str__(self):
         return self.name
 

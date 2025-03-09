@@ -25,7 +25,7 @@ export type TDishResponseType = {
   name: string;
   description: string;
   price: number;
-  ingredients: TIngredientResponseType[];
+  dish_ingredients: {ingredient: TIngredientResponseType; quantity_required: number}[];
   add_ons: TAddonResopnseType[];
   category: TCategoryResopnseType;
 };

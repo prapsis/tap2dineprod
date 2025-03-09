@@ -8,7 +8,8 @@ export const useCheckoutMutation = ({ orderId }: { orderId: string }) => {
         mutationFn: (data: any) => api.patch(`orders/${orderId}/checkout/`, data), //TODO FIX TYPES
 
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["orders","transactions"] });
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: ["transactions"] });
             toastTrigger("Order checkedout successfully", undefined, "success");
         },
         onError: () => {

@@ -54,8 +54,8 @@ export const columns: ColumnDef<TDishResponseType>[] = [
     accessorKey: "ingredients",
     header: "Ingredients",
     cell: ({ row }) =>
-      row.original.ingredients
-        .map((item) => <span>{item.name},&nbsp;</span>)
+      row.original.dish_ingredients
+        .map((item) => <span>{item.ingredient.name},&nbsp;</span>)
         .slice(0, 4),
   },
   {

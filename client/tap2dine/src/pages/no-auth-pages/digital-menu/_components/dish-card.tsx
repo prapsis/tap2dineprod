@@ -8,6 +8,8 @@ type TDishCardProps = {
 }
 export default function DishCard({data}:TDishCardProps) {
   const { openModal } = useModalContext();
+  const isOutOfStock = data?.dish_ingredients?.some(ing => ing.quantity_required > ing.ingredient.quantity_available);
+
   return (
     <div className="bg-background border rounded-md p-2">
       <div className="w-20 h-20 rounded-full border-2 border-secondary overflow-hidden">
@@ -25,8 +27,9 @@ export default function DishCard({data}:TDishCardProps) {
         variant="destructive"
         className="w-full mt-2"
         onClick={() => openModal({ key: "ADD_ORDER", data: data })}
+        disabled={isOutOfStock}
       >
-        Add
+        {isOutOfStock ? "Out of Stock" : "Order Now"}
       </Button>
     </div>
   );
