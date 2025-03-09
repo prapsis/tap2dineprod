@@ -19,7 +19,6 @@ class Dish(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    ingredients = models.ManyToManyField('Ingredient', through='DishIngredient', related_name='dishes')
     add_ons = models.ManyToManyField('AddOn', related_name='dishes', blank=True)
     category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, related_name='dishes')
 
