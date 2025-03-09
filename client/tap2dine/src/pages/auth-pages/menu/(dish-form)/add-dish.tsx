@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useState } from "react";
 import { useAddDishMutation } from "../../../../api/mutations/dish.mutation";
 import { useFetchIngredients } from "../../../../api/queries/ingredients.query";
@@ -166,26 +166,30 @@ export default function AddDish() {
                       <CardContent className="flex items-center gap-3 p-2">
                         <div className="flex-1">
                           <Label htmlFor={`ingredients.${index}.ingredient`}>Ingredient</Label>
-                          <Select
-                            onValueChange={(value) => {
-                              form.setValue(`ingredients.${index}.ingredient`, value);
-                            }}
-                            value={form.getValues(`ingredients.${index}.ingredient`)?.toString()}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select ingredient" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ingredientsData?.map((ingredient: TIngredientResponseType) => (
-                                <SelectItem
-                                  key={ingredient.id}
-                                  value={ingredient.id.toString()}
-                                >
-                                  {ingredient.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Controller
+                            control={form.control}
+                            name={`ingredients.${index}.ingredient`}
+                            render={({ field: controllerField }) => (
+                              <Select
+                                onValueChange={controllerField.onChange}
+                                value={controllerField.value?.toString() || ""}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select ingredient" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {ingredientsData?.map((ingredient: TIngredientResponseType) => (
+                                    <SelectItem
+                                      key={ingredient.id}
+                                      value={ingredient.id.toString()}
+                                    >
+                                      {ingredient.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
                         </div>
                         
                         <div className="flex-1">
@@ -219,7 +223,7 @@ export default function AddDish() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ ingredient:"0", quantity_required: 1 })}
+                  onClick={() => append({ ingredient:"", quantity_required: 0 })}
                   className="mt-2"
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add Ingredient
@@ -240,7 +244,7 @@ export default function AddDish() {
                         }
                       />
                       <Label htmlFor={`addon-${addon.id}`}>
-                        {addon.name} (${addon.price})
+                        {addon.name} (Rs.{addon.price})
                       </Label>
                     </div>
                   ))}

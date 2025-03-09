@@ -13,7 +13,7 @@ export default function PoweredBy() {
         <X size={16} className='cursor-pointer'/>
       </button>
       <p className="text-xs text-stone-950 font-medium">Powered by</p>
-      <img src={HORIZONTAL_LOGO} alt="logo" width={100} onClick={() => window.open("https://prapsis.github.io/tap2dineprod/", "_blank")} />
+      <img src={HORIZONTAL_LOGO} alt="logo" width={100} onClick={() => window.open("https://tap2dine.com", "_blank")} />
     </div>
   )
 }
