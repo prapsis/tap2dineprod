@@ -109,9 +109,9 @@ export default function AddOrder({ data: dish }: ModalType<"ADD_ORDER">) {
                   />
                   <label
                     htmlFor={`ingredient-${ing.ingredient.id}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm capitalize font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {ing.ingredient.name}
+                    {ing.ingredient.name.includes("-") ? ing.ingredient.name.split("-")[0] : ing.ingredient.name}
                   </label>
                 </div>
               ))

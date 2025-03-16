@@ -41,10 +41,19 @@ export const columns: ColumnDef<TIngredientResponseType>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      if(row.original.name.includes("-"))
+        return row.original.name.split("-")[0];
+      else return row.original.name
+    }
   },
   {
     accessorKey: "quantity_available",
-    header: "Quantity available(in gm/ml)",
+    header: "Quantity available",
+  },
+  {
+    header: "Unit",
+    cell: ({ row }) => row.original.name.split("-")[1],
   },
   {
     id: "actions",

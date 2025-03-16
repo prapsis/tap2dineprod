@@ -17,15 +17,19 @@ export default function EditIngredient({
     resolver: zodResolver(ingredientSchema),
     mode: "onChange",
     values: {
-      name: data?.name || "",
+      name: data?.name?.includes("-") ? data?.name?.split("-")[0] : data?.name || "",
       quantity_available: data?.quantity_available || 0,
+      unit: data?.name?.includes("-") ? data?.name?.split("-")[1] : "",
     },
   });
-  const { mutate,isLoading } = useEditIngredientMutation({
+  const { mutate, isLoading } = useEditIngredientMutation({
     initiatorName: initiatorName || "",
   });
   const onSubmit = (data: TIngredientType) => {
-    mutate(data, {
+    mutate({
+      name: `${data.name}-${data.unit}`,
+      quantity_available: data.quantity_available,
+    }, {
       onSuccess: () => {
         form.reset();
         closeModal("EDIT_INGREDIENT");
@@ -51,13 +55,24 @@ export default function EditIngredient({
               required
             />
 
-            <FormInput
-              label="Quantity"
-              form={form}
-              name="quantity_available"
-              type="number"
-              placeholder="Quantity"
-            />
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Quantity"
+                form={form}
+                name="quantity_available"
+                type="number"
+                placeholder="Quantity"
+                required
+              />
+              <FormInput
+                label="Quantity Unit"
+                form={form}
+                name="unit"
+                type="text"
+                placeholder="Eg: gram, litre, piece..."
+                required
+              />
+            </div>
             <div className="flex justify-end gap-3">
               <Button
                 variant={"outline"}

@@ -49,7 +49,7 @@ const OrderSummary = ({ item }: { item: OrderItem }) => {
                         .filter(ing => !ing.include)
                         .map(ing => (
                             <Badge key={ing.id} variant="secondary" className='text-white'>
-                                No {ing.name}
+                                No {ing.name.includes("-") ? ing.name.split("-")[0] : ing.name}
                             </Badge>
                         ))}
                 </div>

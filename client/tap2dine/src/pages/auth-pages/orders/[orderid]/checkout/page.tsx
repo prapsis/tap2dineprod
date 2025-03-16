@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-    CreditCard,
+    // CreditCard,
     Wallet,
     ArrowLeft,
     Clock,
@@ -264,13 +264,13 @@ export default function OrderCheckout() {
                                     Cash Payment
                                 </Label>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            {/* <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="card" id="card" />
                                 <Label htmlFor="card" className="flex items-center gap-2">
                                     <CreditCard className="h-4 w-4" />
                                     Card Payment
                                 </Label>
-                            </div>
+                            </div> */}
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="khalti" id="khalti" />
                                 <Label htmlFor="khalti" className="flex items-center gap-2">

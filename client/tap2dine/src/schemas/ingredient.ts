@@ -9,6 +9,7 @@ export const ingredientSchema = z.object({
     .number()
     .int()
     .min(0, { message: "Quantity must be a positive number" }),
+  unit: z.string().min(1, { message: "Unit is required" }).max(10, { message: "Unit must be less than 10 characters" }),
 });
 
 export type TIngredientType = z.infer<typeof ingredientSchema>;

@@ -15,11 +15,15 @@ export default function AddIngredient() {
     values: {
       name: "",
       quantity_available: 0,
+      unit:"",
     },
   });
   const { mutate,isLoading } = useAddIngredientMutation();
   const onSubmit = (data: TIngredientType) => {
-    mutate(data, {
+    mutate({
+      name: `${data.name}-${data.unit}`,
+      quantity_available: data.quantity_available,
+    }, {
       onSuccess: () => {
         form.reset();
         closeModal("ADD_INGREDIENT");
@@ -44,14 +48,24 @@ export default function AddIngredient() {
               placeholder="Ingredient"
               required
             />
-
+            <div className="flex items-center gap-2">
             <FormInput
               label="Quantity"
               form={form}
               name="quantity_available"
               type="number"
               placeholder="Quantity"
+              required
             />
+            <FormInput
+              label="Quantity Unit"
+              form={form}
+              name="unit"
+              type="text"
+              placeholder="Eg: gram, litre, piece..."
+              required
+            />
+            </div>
             <div className="flex justify-end gap-3">
               <Button
                 variant={"outline"}

@@ -183,7 +183,7 @@ export default function AddDish() {
                                       key={ingredient.id}
                                       value={ingredient.id.toString()}
                                     >
-                                      {ingredient.name}
+                                      {ingredient.name.includes("-") ? `${ingredient.name.split("-")[0]} (in ${ingredient.name.split("-")[1]})` : ingredient.name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -193,7 +193,7 @@ export default function AddDish() {
                         </div>
                         
                         <div className="flex-1">
-                          <Label htmlFor={`ingredients.${index}.quantity_required`}>Quantity(In gm/ml)</Label>
+                          <Label htmlFor={`ingredients.${index}.quantity_required`}>Quantity</Label>
                           <Input
                             id={`ingredients.${index}.quantity_required`}
                             type="number"

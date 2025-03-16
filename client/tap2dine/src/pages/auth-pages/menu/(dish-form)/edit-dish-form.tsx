@@ -84,7 +84,7 @@ export default function EditDishForm({ dishId, dishData, categories, addons, ing
                                 <Select onValueChange={(value) => form.setValue(`ingredients.${index}.ingredient`, value)} value={field.ingredient}>
                                     <SelectTrigger><SelectValue placeholder="Select ingredient" /></SelectTrigger>
                                     <SelectContent>
-                                        {ingredients.map(ingredient => <SelectItem key={ingredient.id} value={ingredient.id.toString()}>{ingredient.name}</SelectItem>)}
+                                        {ingredients.map(ingredient => <SelectItem key={ingredient.id} value={ingredient.id.toString()}>{ingredient.name.includes("-") ? `${ingredient.name.split("-")[0]} (in ${ingredient.name.split("-")[1]})` : ingredient.name}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
                                 <Input type="number" {...form.register(`ingredients.${index}.quantity_required`, { valueAsNumber: true })} placeholder="Quantity" />
@@ -93,8 +93,8 @@ export default function EditDishForm({ dishId, dishData, categories, addons, ing
                         </Card>
                     ))}
                     <Button type="button" variant="outline" size="sm" onClick={() => append({ ingredient: "", quantity_required: 1 })}><Plus className="h-4 w-4 mr-2" /> Add Ingredient</Button>
-
-                    <Label>Add-ons</Label>
+                    <div>
+                    <Label className="pb-2">Add-ons</Label>
                     <div className="grid grid-cols-2 gap-2">
                         {addons.map(addon => (
                             <div key={addon.id} className="flex items-center space-x-2">
@@ -102,6 +102,7 @@ export default function EditDishForm({ dishId, dishData, categories, addons, ing
                                 <Label htmlFor={`addon-${addon.id}`}>{addon.name} (${addon.price})</Label>
                             </div>
                         ))}
+                    </div>
                     </div>
 
                     <div className="flex justify-end gap-3">

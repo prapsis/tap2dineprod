@@ -32,7 +32,7 @@ const OrderSheet = () => {
             .map(item => {
                 const excludedIngredients = item.ingredients
                     .filter(ingredient => !ingredient.include)
-                    .map(ingredient => `No ${ingredient.name}`)
+                    .map(ingredient => `No ${ingredient.name.includes("-") ? ingredient.name.split("-")[0] : ingredient.name}`)
                     .join(", ");
 
                 return excludedIngredients ? `${item.name}: ${excludedIngredients}` : "";
