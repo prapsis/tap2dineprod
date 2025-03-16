@@ -57,7 +57,7 @@ export default function IngredientStock({data}:{data:TIngredientResponseType[]})
           <CardDescription className="text-xs">Current inventory quantities</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-[150px]">
+          <div className="w-full h-[200px]">
             <ChartContainer
               config={{
                 stock: {
