@@ -144,7 +144,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "GET",
@@ -160,7 +160,10 @@ CORS_ALLOW_HEADERS = [
     "authorization",
     "x-csrftoken",
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",      
+    "https://tap2dineprod.vercel.app",    
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
