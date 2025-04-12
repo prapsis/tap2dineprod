@@ -24,15 +24,15 @@ export function MenuManagement({data:dishes}:{data:TDishResponseType[]}) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {displayedDishes.map((dish) => (
+          {displayedDishes?.map((dish) => (
             <div 
               key={dish.id} 
               className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
             >
               <div>
-                <p className="font-semibold">{dish.name}</p>
+                <p className="font-semibold">{dish?.name}</p>
                 <p className="text-sm text-gray-600">
-                  {dish.category.name} | {dish.description}
+                  {dish?.category?.name} | {dish?.description}
                 </p>
               </div>
               <p className="font-medium">Rs. {(Number(dish.price)).toFixed(2)}</p>
